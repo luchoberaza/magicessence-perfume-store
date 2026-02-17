@@ -109,14 +109,15 @@ function sanitizeCartState(v: unknown): CartState {
 
 function getInitialState(): CartState {
   if (typeof window === "undefined") {
-    return DEFAULT_STATE
+    return { items: [], discountCode: null, discountType: null, discountValue: 0 }
   }
-...
-  if (stored) return sanitizeCartState(JSON.parse(stored))
-...
-  return DEFAULT_STATE
-
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) return sanitizeCartState(JSON.parse(stored))
+  } catch { }
+  return { items: [], discountCode: null, discountType: null, discountValue: 0 }
 }
+
 
 let state: CartState = getInitialState()
 const listeners = new Set<() => void>()
@@ -194,7 +195,7 @@ export function useCart() {
   )
 
   const clearCart = useCallback(() => {
-    state = DEFAULT_STATE
+    state = { items: [], discountCode: null, discountType: null, discountValue: 0 }
     emit()
   }, [])
 
