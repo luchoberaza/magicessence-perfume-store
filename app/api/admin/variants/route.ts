@@ -4,8 +4,16 @@ import { sql } from "@/lib/db"
 import { isAuthenticated } from "@/lib/admin-auth"
 
 function revalidateStore() {
-  revalidatePath("/(store)", "layout")
+  try {
+    // (store) NO es parte de la URL real
+    revalidatePath("/", "layout")
+    revalidatePath("/productos")
+    revalidatePath("/categorias")
+  } catch {
+    // nunca rompas el flujo por un revalidate
+  }
 }
+
 
 export async function POST(request: NextRequest) {
   if (!(await isAuthenticated())) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
