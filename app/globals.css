@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background: very dark midnight blue-black */
+    --background: 235 25% 5%;
+    --foreground: 240 10% 95%;
+
+    /* Cards: slightly lighter midnight */
+    --card: 235 22% 9%;
+    --card-foreground: 240 10% 95%;
+
+    --popover: 235 22% 9%;
+    --popover-foreground: 240 10% 95%;
+
+    /* Primary: soft violet-purple */
+    --primary: 265 55% 65%;
+    --primary-foreground: 240 20% 4%;
+
+    /* Secondary: deep midnight blue */
+    --secondary: 235 30% 15%;
+    --secondary-foreground: 240 10% 88%;
+
+    /* Muted: dark midnight, muted-foreground: cool grey-lavender */
+    --muted: 235 22% 12%;
+    --muted-foreground: 240 8% 52%;
+
+    /* Accent: brighter purple for highlights */
+    --accent: 270 50% 55%;
+    --accent-foreground: 240 10% 95%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders: subtle midnight blue lines */
+    --border: 235 20% 16%;
+    --input: 235 20% 16%;
+    --ring: 265 55% 65%;
+
+    --chart-1: 265 55% 65%;
+    --chart-2: 270 50% 55%;
+    --chart-3: 240 10% 55%;
+    --chart-4: 250 40% 50%;
+    --chart-5: 280 30% 45%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 235 25% 7%;
+    --sidebar-foreground: 240 10% 88%;
+    --sidebar-primary: 265 55% 65%;
+    --sidebar-primary-foreground: 240 20% 4%;
+    --sidebar-accent: 235 22% 12%;
+    --sidebar-accent-foreground: 240 10% 88%;
+    --sidebar-border: 235 20% 16%;
+    --sidebar-ring: 265 55% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .glass {
+    @apply bg-card/60 backdrop-blur-xl border border-border/50;
+  }
+  .glass-hover {
+    @apply hover:bg-card/80 hover:border-primary/20 transition-all duration-300;
+  }
+}
