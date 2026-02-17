@@ -129,7 +129,7 @@ export function ProductsTab() {
     fd.append("product_id", String(productId))
     fd.append("sort_order", "0")
     const res = await fetch("/api/admin/images", { method: "POST", body: fd })
-    if (res.ok) { toast.success("Imagen subida"); fetchAll() } else { toast.error("Error al subir imagen") }
+    if (res.ok) { toast.success("Imagen subida"); fetchAll() } else { const msg = await res.text(); toast.error(msg || "Error al subir imagen"); }
   }
 
   async function handleImageDelete(imageId: number, url: string) {
@@ -201,7 +201,7 @@ export function ProductsTab() {
       </div>
 
       {loading ? (
-        <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-20 animate-pulse rounded-xl bg-secondary/50" />)}</div>
+        <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-20 animate-pulse rounded-xl bg-secondary/50" />)}</div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl glass py-12 text-center"><p className="text-muted-foreground">No hay productos</p></div>
       ) : (
