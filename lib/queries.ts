@@ -22,11 +22,23 @@ export async function getProducts(options?: {
       SELECT p.*,
         c.name as category_name,
         c.slug as category_slug,
+                ARRAY(
+          SELECT DISTINCT cid FROM (
+            SELECT p.category_id as cid
+            UNION ALL
+            SELECT pc.category_id FROM product_categories pc WHERE pc.product_id = p.id
+          ) t
+          WHERE cid IS NOT NULL
+        ) as category_ids,
         (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
         EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.is_active = true AND p.category_id = ${options.categoryId} AND p.featured = true
+      WHERE p.is_active = true
+  AND (
+    p.category_id = ${options.categoryId}
+    OR EXISTS(SELECT 1 FROM product_categories pc WHERE pc.product_id = p.id AND pc.category_id = ${options.categoryId})
+  ) AND p.featured = true
       ORDER BY p.created_at DESC
     `
   } else if (options?.categoryId) {
@@ -34,11 +46,23 @@ export async function getProducts(options?: {
       SELECT p.*,
         c.name as category_name,
         c.slug as category_slug,
+                ARRAY(
+          SELECT DISTINCT cid FROM (
+            SELECT p.category_id as cid
+            UNION ALL
+            SELECT pc.category_id FROM product_categories pc WHERE pc.product_id = p.id
+          ) t
+          WHERE cid IS NOT NULL
+        ) as category_ids,
         (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
         EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.is_active = true AND p.category_id = ${options.categoryId}
+      WHERE p.is_active = true
+  AND (
+    p.category_id = ${options.categoryId}
+    OR EXISTS(SELECT 1 FROM product_categories pc WHERE pc.product_id = p.id AND pc.category_id = ${options.categoryId})
+  )
       ORDER BY p.created_at DESC
     `
   } else if (options?.featured) {
@@ -46,6 +70,14 @@ export async function getProducts(options?: {
       SELECT p.*,
         c.name as category_name,
         c.slug as category_slug,
+                ARRAY(
+          SELECT DISTINCT cid FROM (
+            SELECT p.category_id as cid
+            UNION ALL
+            SELECT pc.category_id FROM product_categories pc WHERE pc.product_id = p.id
+          ) t
+          WHERE cid IS NOT NULL
+        ) as category_ids,
         (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
         EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
       FROM products p
@@ -58,6 +90,14 @@ export async function getProducts(options?: {
       SELECT p.*,
         c.name as category_name,
         c.slug as category_slug,
+                ARRAY(
+          SELECT DISTINCT cid FROM (
+            SELECT p.category_id as cid
+            UNION ALL
+            SELECT pc.category_id FROM product_categories pc WHERE pc.product_id = p.id
+          ) t
+          WHERE cid IS NOT NULL
+        ) as category_ids,
         (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
         EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
       FROM products p
@@ -86,6 +126,14 @@ export async function getProductBySlug(slug: string): Promise<ProductWithDetails
     SELECT p.*,
       c.name as category_name,
       c.slug as category_slug,
+            ARRAY(
+        SELECT DISTINCT cid FROM (
+          SELECT p.category_id as cid
+          UNION ALL
+          SELECT pc.category_id FROM product_categories pc WHERE pc.product_id = p.id
+        ) t
+        WHERE cid IS NOT NULL
+      ) as category_ids,
       (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
       EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
     FROM products p
@@ -110,6 +158,14 @@ export async function getFeaturedProducts(limit = 3): Promise<ProductWithDetails
     SELECT p.*,
       c.name as category_name,
       c.slug as category_slug,
+            ARRAY(
+        SELECT DISTINCT cid FROM (
+          SELECT p.category_id as cid
+          UNION ALL
+          SELECT pc.category_id FROM product_categories pc WHERE pc.product_id = p.id
+        ) t
+        WHERE cid IS NOT NULL
+      ) as category_ids,
       (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
       EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
     FROM products p

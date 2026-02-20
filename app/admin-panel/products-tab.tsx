@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +36,8 @@ interface Product {
   brand: string | null
   description: string | null
   category_id: number | null
+  category_ids?: number[]
+  color_hex: string | null
   category_name: string | null
   featured: boolean
   is_active: boolean
@@ -58,7 +60,14 @@ export function ProductsTab() {
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [form, setForm] = useState({
-    name: "", slug: "", brand: "", description: "", category_id: "", featured: false, is_active: true,
+    name: "",
+    slug: "",
+    brand: "",
+    description: "",
+    color_hex: "",
+    category_ids: [] as number[],
+    featured: false,
+    is_active: true,
   })
 
   // Variant management
@@ -86,15 +95,24 @@ export function ProductsTab() {
 
   function openCreate() {
     setEditing(null)
-    setForm({ name: "", slug: "", brand: "", description: "", category_id: "", featured: false, is_active: true })
+    setForm({ name: "", slug: "", brand: "", description: "", color_hex: "", category_ids: [], featured: false, is_active: true })
     setDialogOpen(true)
   }
 
   function openEdit(p: Product) {
     setEditing(p)
+    const catIds = (p.category_ids && p.category_ids.length > 0)
+      ? p.category_ids
+      : (p.category_id ? [p.category_id] : [])
     setForm({
-      name: p.name, slug: p.slug, brand: p.brand || "", description: p.description || "",
-      category_id: p.category_id ? String(p.category_id) : "", featured: p.featured, is_active: p.is_active,
+      name: p.name,
+      slug: p.slug,
+      brand: p.brand || "",
+      description: p.description || "",
+      color_hex: p.color_hex || "",
+      category_ids: catIds,
+      featured: p.featured,
+      is_active: p.is_active,
     })
     setDialogOpen(true)
   }
@@ -102,7 +120,8 @@ export function ProductsTab() {
   async function handleSave() {
     const body = {
       ...form,
-      category_id: form.category_id ? parseInt(form.category_id) : null,
+      color_hex: form.color_hex?.trim() ? form.color_hex.trim() : null,
+      category_ids: form.category_ids,
       ...(editing ? { id: editing.id } : {}),
     }
     const method = editing ? "PUT" : "POST"
@@ -298,14 +317,38 @@ export function ProductsTab() {
                 <Input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} className="bg-secondary/50" />
               </div>
               <div className="space-y-2">
-                <Label className="text-foreground">Categoria</Label>
-                <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
-                  <SelectTrigger className="bg-secondary/50"><SelectValue placeholder="Sin categoria" /></SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Label className="text-foreground">Color (Hex)</Label>
+                <Input
+                  value={form.color_hex}
+                  onChange={(e) => setForm({ ...form, color_hex: e.target.value })}
+                  placeholder="#RRGGBB (opcional)"
+                  className="bg-secondary/50"
+                />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground">Categorias (puede ser más de una)</Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {categories.map((c) => {
+                  const checked = form.category_ids.includes(c.id)
+                  return (
+                    <label key={c.id} className="flex items-center gap-2 rounded-lg bg-secondary/30 px-3 py-2 text-sm text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => {
+                          const next = e.target.checked
+                            ? Array.from(new Set([...form.category_ids, c.id]))
+                            : form.category_ids.filter((id) => id !== c.id)
+                          setForm({ ...form, category_ids: next })
+                        }}
+                      />
+                      <span className="truncate">{c.name}</span>
+                    </label>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">Tip: el primer checkbox marcado se usa como categoría principal (para compatibilidad).</p>
             </div>
             <div className="space-y-2">
               <Label className="text-foreground">Descripcion</Label>

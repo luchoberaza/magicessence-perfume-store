@@ -92,7 +92,10 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
           </Badge>
         )}
 
-        <h1 className="text-3xl font-bold text-foreground lg:text-4xl">
+        <h1
+          className="text-3xl font-bold text-foreground lg:text-4xl"
+          style={product.color_hex ? { color: product.color_hex } : undefined}
+        >
           {product.name}
         </h1>
 
@@ -128,8 +131,8 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
                     selectedVariant?.id === variant.id
                       ? "border-primary bg-primary/10 text-primary"
                       : variant.in_stock
-                      ? "border-border bg-secondary/50 text-foreground hover:border-primary/50"
-                      : "border-border/50 bg-muted/30 text-muted-foreground line-through opacity-60 cursor-not-allowed"
+                        ? "border-border bg-secondary/50 text-foreground hover:border-primary/50"
+                        : "border-border/50 bg-muted/30 text-muted-foreground line-through opacity-60 cursor-not-allowed"
                   )}
                 >
                   {variant.name}

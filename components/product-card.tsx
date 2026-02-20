@@ -46,7 +46,10 @@ export function ProductCard({ product }: { product: ProductWithDetails }) {
             {product.category_name}
           </span>
         )}
-        <h3 className="text-sm font-semibold leading-tight text-foreground text-pretty">
+        <h3
+          className="text-sm font-semibold leading-tight text-foreground text-pretty"
+          style={product.color_hex ? { color: product.color_hex } : undefined}
+        >
           {product.name}
         </h3>
         {product.brand && (

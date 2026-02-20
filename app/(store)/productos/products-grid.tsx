@@ -34,7 +34,12 @@ export function ProductsGrid({
     }
 
     if (categoryFilter !== "all") {
-      result = result.filter((p) => p.category_slug === categoryFilter)
+      const cat = categories.find((c) => c.slug === categoryFilter)
+      result = result.filter((p) => {
+        if (p.category_slug === categoryFilter) return true
+        if (!cat) return false
+        return (p.category_ids || []).includes(cat.id)
+      })
     }
 
     if (stockOnly) {

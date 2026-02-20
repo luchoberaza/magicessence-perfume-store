@@ -13,6 +13,7 @@ export interface Product {
   brand: string | null
   description: string | null
   category_id: number | null
+  color_hex: string | null
   featured: boolean
   is_active: boolean
   created_at: string
@@ -50,6 +51,7 @@ export interface ProductWithDetails extends Product {
   variants: Variant[]
   category_name: string | null
   category_slug: string | null
+  category_ids?: number[]
   min_price: number | null
   has_stock: boolean
 }
