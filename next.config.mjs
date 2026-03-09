@@ -11,7 +11,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "*magicessence-image-proxy.lberaza9.workers.dev",
+        hostname: "magicessence-image-proxy.lberaza9.workers.dev",
       },
     ],
   },
