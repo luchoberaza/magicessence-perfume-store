@@ -4,6 +4,36 @@ import { put, del } from "@vercel/blob"
 import { sql } from "@/lib/db"
 import { isAuthenticated } from "@/lib/admin-auth"
 
+const BLOB_PUBLIC_HOST =
+  process.env.BLOB_PUBLIC_HOST ?? "vvcgxc638vwxy6ge.public.blob.vercel-storage.com"
+
+const IMAGE_PROXY_HOST =
+  process.env.IMAGE_PROXY_HOST ?? "magicessence-image-proxy.lberaza9.workers.dev"
+
+function toStoredImageUrl(blobUrl: string) {
+  try {
+    const url = new URL(blobUrl)
+    if (url.hostname === BLOB_PUBLIC_HOST) {
+      url.hostname = IMAGE_PROXY_HOST
+    }
+    return url.toString()
+  } catch {
+    return blobUrl
+  }
+}
+
+function toBlobUrl(publicUrl: string) {
+  try {
+    const url = new URL(publicUrl)
+    if (url.hostname === IMAGE_PROXY_HOST) {
+      url.hostname = BLOB_PUBLIC_HOST
+    }
+    return url.toString()
+  } catch {
+    return publicUrl
+  }
+}
+
 function revalidateStore() {
   try {
     // (store) no es parte de la URL real
@@ -49,9 +79,11 @@ export async function POST(request: NextRequest) {
       access: "public",
     })
 
+    const publicUrl = toStoredImageUrl(blob.url)
+
     const rows = await sql`
       INSERT INTO product_images (product_id, url, sort_order)
-      VALUES (${productId}, ${blob.url}, ${Number.isFinite(sortOrder) ? sortOrder : 0})
+      VALUES (${productId}, ${publicUrl}, ${Number.isFinite(sortOrder) ? sortOrder : 0})
       RETURNING *
     `
 
@@ -75,7 +107,7 @@ export async function DELETE(request: NextRequest) {
   const { id, url } = await request.json()
 
   try {
-    await del(url)
+    await del(toBlobUrl(url))
   } catch {
     // Blob deletion might fail for non-blob URLs; continue anyway
   }

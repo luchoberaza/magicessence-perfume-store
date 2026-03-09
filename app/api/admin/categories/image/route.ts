@@ -3,6 +3,36 @@ import { put, del } from "@vercel/blob"
 import { sql } from "@/lib/db"
 import { isAuthenticated } from "@/lib/admin-auth"
 
+const BLOB_PUBLIC_HOST =
+  process.env.BLOB_PUBLIC_HOST ?? "vvcgxc638vwxy6ge.public.blob.vercel-storage.com"
+
+const IMAGE_PROXY_HOST =
+  process.env.IMAGE_PROXY_HOST ?? "magicessence-image-proxy.lberaza9.workers.dev"
+
+function toStoredImageUrl(blobUrl: string) {
+  try {
+    const url = new URL(blobUrl)
+    if (url.hostname === BLOB_PUBLIC_HOST) {
+      url.hostname = IMAGE_PROXY_HOST
+    }
+    return url.toString()
+  } catch {
+    return blobUrl
+  }
+}
+
+function toBlobUrl(publicUrl: string) {
+  try {
+    const url = new URL(publicUrl)
+    if (url.hostname === IMAGE_PROXY_HOST) {
+      url.hostname = BLOB_PUBLIC_HOST
+    }
+    return url.toString()
+  } catch {
+    return publicUrl
+  }
+}
+
 export async function POST(request: NextRequest) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })
@@ -18,9 +48,11 @@ export async function POST(request: NextRequest) {
 
   const blob = await put(`categories/${categoryId}/${file.name}`, file, { access: "public" })
 
-  await sql`UPDATE categories SET image_url = ${blob.url} WHERE id = ${parseInt(categoryId)}`
+  const publicUrl = toStoredImageUrl(blob.url)
 
-  return NextResponse.json({ url: blob.url })
+  await sql`UPDATE categories SET image_url = ${publicUrl} WHERE id = ${parseInt(categoryId)}`
+
+  return NextResponse.json({ url: publicUrl })
 }
 
 export async function DELETE(request: NextRequest) {
@@ -31,7 +63,7 @@ export async function DELETE(request: NextRequest) {
   const { category_id, url } = await request.json()
 
   try {
-    await del(url)
+    await del(toBlobUrl(url))
   } catch {
     // Blob deletion might fail for non-blob URLs; continue anyway
   }

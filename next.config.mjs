@@ -9,6 +9,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
       },
+      {
+        protocol: "https",
+        hostname: "*magicessence-image-proxy.lberaza9.workers.dev",
+      },
     ],
   },
 }
