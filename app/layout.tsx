@@ -15,6 +15,26 @@ export const metadata: Metadata = {
   },
   description:
     "Descubri fragancias exclusivas en Mistic Essence. Perfumes premium, decants y mas en Salto, Uruguay.",
+
+metadataBase: new URL("https://www.misticessence.com"),
+alternates: {
+  canonical: "/",
+},
+openGraph: {
+  title: "Mistic Essence | Perfumes Premium en Salto, Uruguay",
+  description:
+    "Descubrí fragancias exclusivas en Mistic Essence. Perfumes premium, decants y más en Salto, Uruguay.",
+  url: "https://www.misticessence.com",
+  siteName: "Mistic Essence",
+  locale: "es_UY",
+  type: "website",
+},
+twitter: {
+  card: "summary_large_image",
+  title: "Mistic Essence | Perfumes Premium en Salto, Uruguay",
+  description:
+    "Descubrí fragancias exclusivas en Mistic Essence. Perfumes premium, decants y más en Salto, Uruguay.",
+},
 }
 
 export default function RootLayout({
