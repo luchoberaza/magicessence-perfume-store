@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Mistic Essence",
   },
   description:
-    "Descubri fragancias exclusivas en Mistic Essence. Perfumes premium, decants y mas en Salto, Uruguay.",
+    "Descubrí fragancias exclusivas en Mistic Essence. Perfumes premium, decants y más en Salto, Uruguay.",
 
 metadataBase: new URL("https://www.misticessence.com"),
 alternates: {
@@ -35,7 +35,48 @@ twitter: {
   description:
     "Descubrí fragancias exclusivas en Mistic Essence. Perfumes premium, decants y más en Salto, Uruguay.",
 },
+ keywords: [
+    "perfumes",
+  "perfumes premium",
+  "decants",
+  "fragancias",
+  "Mistic Essence",
+  "perfumes en Salto",
+  "perfumes en Uruguay",
+  "perfumes exclusivos",
+  "perfumes de alta calidad",
+  "perfumes para hombres",
+  "perfumes para mujeres",
+  "perfumes salto",
+  "perfumes uruguay",
+  "perfumes online",
+  "perfumes a domicilio",
+  "perfumes originales",
+  "perfumes de diseñador",
+  "perfumes de nicho",
+  "perfumes unisex",
+  "perfumes de autor",
+  "perfumes de lujo",
+  "salto perfumes",
+  "uruguay perfumes",
+  "perfumes baratos",
+  "perfumes económicos",
+  "perfumes de calidad",
+  "perfumes para regalar",
+  "perfumes para ocasiones especiales",
+  "perfumes para el día a día",
+  "decants de perfumes",
+  "decants de fragancias",
+  "decants de perfumes premium",
+  "decants de perfumes exclusivos",
+  "decants de perfumes de diseñador",
+  "decants de perfumes de nicho",
+  "decants de perfumes unisex",
+  "decants de perfumes de autor",
+  "decants de perfumes de lujo",
+  ],
 }
+
 
 export default function RootLayout({
   children,
