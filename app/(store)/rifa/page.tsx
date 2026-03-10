@@ -1,5 +1,6 @@
 import { Wifi } from "lucide-react"
 import { getRaffleEntries } from "@/lib/queries"
+import { RaffleGrid } from "./raffle-grid"
 
 export const revalidate = 60
 
@@ -10,7 +11,6 @@ export const metadata = {
 
 export default async function RifaPage() {
   const occupiedNumbers = await getRaffleEntries()
-  const occupiedSet = new Set(occupiedNumbers)
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
@@ -25,40 +25,11 @@ export default async function RifaPage() {
           </span>
         </h1>
         <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-          Planilla de la rifa &mdash; {occupiedSet.size} de 300 numeros vendidos
+          Planilla de la rifa &mdash; {occupiedNumbers.length} de 300 numeros vendidos
         </p>
       </div>
 
-      {/* Legend */}
-      <div className="mb-6 flex items-center justify-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-4 w-4 rounded border border-border bg-secondary/30" />
-          <span className="text-muted-foreground">Disponible</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-4 w-4 rounded border border-primary/50 bg-primary/20" />
-          <span className="text-muted-foreground">Vendido</span>
-        </div>
-      </div>
-
-      {/* Grid */}
-      <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-15">
-        {Array.from({ length: 300 }, (_, i) => i + 1).map((n) => {
-          const sold = occupiedSet.has(n)
-          return (
-            <div
-              key={n}
-              className={`flex items-center justify-center rounded-md border text-sm font-medium h-10 sm:h-9 select-none ${
-                sold
-                  ? "border-primary/50 bg-primary/20 text-primary"
-                  : "border-border bg-secondary/30 text-foreground"
-              }`}
-            >
-              {n}
-            </div>
-          )
-        })}
-      </div>
+      <RaffleGrid occupiedNumbers={occupiedNumbers} />
 
       {/* Bottom note */}
       <p className="mt-8 text-center text-xs text-muted-foreground">

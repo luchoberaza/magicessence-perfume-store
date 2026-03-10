@@ -61,7 +61,8 @@ function sanitizeCartItem(v: unknown): CartItem | null {
   const price = asNumber(v.price, NaN)
   const quantity = asInt(v.quantity, 0)
 
-  if (variantId < 0 || productId < 0) return null
+  const isRaffleItem = variantId <= -1 && variantId >= -300 && productId === 0
+  if (!isRaffleItem && (variantId < 0 || productId < 0)) return null
   if (!productName || !productSlug || !variantName) return null
   if (!Number.isFinite(price) || price < 0) return null
   if (quantity <= 0) return null
