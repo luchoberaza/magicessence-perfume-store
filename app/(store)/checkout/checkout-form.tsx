@@ -17,7 +17,7 @@ import Link from "next/link"
 const schema = z.object({
   departamento: z.string().min(1, "Requerido"),
   domicilio: z.string().min(1, "Requerido"),
-  correo: z.string().email("Email no valido"),
+  correo: z.string().email("Email no valido").or(z.literal("")).optional(),
   metodoPago: z.enum(["transferencia", "efectivo"]),
   entrega: z.enum(["retiro", "envio"]),
   nota: z.string().optional(),
@@ -83,7 +83,7 @@ export function CheckoutForm() {
       {
         departamento: data.departamento,
         domicilio: data.domicilio,
-        correo: data.correo,
+        correo: data.correo || undefined,
         metodoPago: data.metodoPago === "transferencia" ? "Transferencia" : "Efectivo",
         entrega: data.entrega === "retiro" ? "Retiro" : "Envio",
         nota: data.nota || undefined,
@@ -191,7 +191,9 @@ export function CheckoutForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="correo" className="text-foreground">Correo electronico</Label>
+            <Label htmlFor="correo" className="text-foreground">
+              Correo electronico <span className="text-xs text-muted-foreground">(opcional)</span>
+            </Label>
             <Input
               id="correo"
               type="email"
