@@ -15,6 +15,7 @@ import { buildOrderWhatsAppUrl } from "@/lib/whatsapp"
 import Link from "next/link"
 
 const schema = z.object({
+  nombre: z.string().min(1, "Requerido"),
   departamento: z.string().min(1, "Requerido"),
   domicilio: z.string().min(1, "Requerido"),
   correo: z.string().email("Email no valido").or(z.literal("")).optional(),
@@ -81,6 +82,7 @@ export function CheckoutForm() {
       cart.discount,
       cart.total,
       {
+        nombre: data.nombre,
         departamento: data.departamento,
         domicilio: data.domicilio,
         correo: data.correo || undefined,
@@ -157,6 +159,19 @@ export function CheckoutForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="lg:col-span-3 space-y-5">
         <div className="rounded-2xl glass p-5 space-y-5">
           <h2 className="text-lg font-semibold text-foreground">Datos de entrega</h2>
+
+          <div className="space-y-2">
+            <Label htmlFor="nombre" className="text-foreground">Nombre</Label>
+            <Input
+              id="nombre"
+              placeholder="Tu nombre completo"
+              className="bg-secondary/50"
+              {...register("nombre")}
+            />
+            {errors.nombre && (
+              <p className="text-xs text-destructive">{errors.nombre.message}</p>
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="departamento" className="text-foreground">Departamento</Label>

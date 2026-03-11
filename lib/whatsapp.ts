@@ -29,6 +29,7 @@ export interface OrderItem {
 }
 
 export interface OrderCustomer {
+  nombre: string
   departamento: string
   domicilio: string
   correo?: string
@@ -59,6 +60,7 @@ export function buildOrderWhatsAppUrl(
   }
   text += `TOTAL: ${fmt.format(total)}\n`
   text += `\n--- Datos del Cliente ---\n`
+  text += `Nombre: ${customer.nombre}\n`
   text += `Departamento: ${customer.departamento}\n`
   text += `Domicilio: ${customer.domicilio}\n`
   if (customer.correo) text += `Correo: ${customer.correo}\n`
