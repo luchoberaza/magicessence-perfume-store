@@ -47,7 +47,7 @@ export function RaffleGrid({ occupiedNumbers }: RaffleGridProps) {
       productSlug: "rifa",
       variantName: `N° ${confirmNumber}`,
       ml: null,
-      price: 0,
+      price: 250,
       imageUrl: null,
     })
     toast.success(`Numero ${confirmNumber} agregado al carrito`)

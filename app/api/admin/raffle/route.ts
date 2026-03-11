@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { sql } from "@/lib/db"
 import { isAuthenticated } from "@/lib/admin-auth"
 
@@ -29,6 +30,7 @@ export async function PUT(request: NextRequest) {
     DO UPDATE SET participant_name = ${name}, updated_at = NOW()
     RETURNING *
   `
+  revalidatePath("/rifa")
   return NextResponse.json(rows[0])
 }
 
@@ -42,5 +44,6 @@ export async function DELETE(request: NextRequest) {
   }
 
   await sql`DELETE FROM raffle_entries WHERE number = ${number}`
+  revalidatePath("/rifa")
   return NextResponse.json({ success: true })
 }

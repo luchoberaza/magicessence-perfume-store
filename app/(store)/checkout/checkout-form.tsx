@@ -91,14 +91,8 @@ export function CheckoutForm() {
       cart.discountCode || undefined
     )
 
-    const win = window.open(url, "_blank", "noopener,noreferrer")
-    if (win) {
-      cart.clearCart()
-    } else {
-      alert(
-        "Tu navegador bloqueó la apertura de WhatsApp. Permití los pop-ups y volvé a intentar enviar el pedido."
-      )
-    }
+    cart.clearCart()
+    window.location.href = url
 
   }
 

@@ -2,7 +2,7 @@ import { Wifi } from "lucide-react"
 import { getRaffleEntries } from "@/lib/queries"
 import { RaffleGrid } from "./raffle-grid"
 
-export const revalidate = 60
+export const revalidate = 15
 
 export const metadata = {
   title: "Rifa | Mistic Essence",
