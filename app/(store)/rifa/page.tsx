@@ -1,3 +1,9 @@
+import { notFound } from "next/navigation"
+
+export default function RifaPage() {
+  notFound()
+}
+
 /*
 import { Wifi } from "lucide-react"
 import { getRaffleEntries } from "@/lib/queries"
