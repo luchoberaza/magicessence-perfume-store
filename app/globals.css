@@ -65,6 +65,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  ::selection {
+    background-color: hsl(265 55% 65% / 0.3);
+    color: hsl(240 10% 95%);
+  }
 }
 
 @layer utilities {
@@ -77,4 +82,24 @@
   .glass-hover {
     @apply hover:bg-card/80 hover:border-primary/20 transition-all duration-300;
   }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(235 25% 5%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(265 55% 65% / 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(265 55% 65% / 0.5);
 }

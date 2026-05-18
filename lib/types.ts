@@ -15,6 +15,7 @@ export interface Product {
   category_id: number | null
   color_hex: string | null
   featured: boolean
+  sale_by_order: boolean
   is_active: boolean
   created_at: string
 }

@@ -23,9 +23,9 @@ export function StoreFooter() {
             <Link href="/productos" className="transition-colors hover:text-foreground">
               Productos
             </Link>
-            <Link href="/rifa" className="transition-colors hover:text-foreground">
+            {/* <Link href="/rifa" className="transition-colors hover:text-foreground">
               Rifa
-            </Link>
+            </Link> */}
             <Link href="/contacto" className="transition-colors hover:text-foreground">
               Contacto
             </Link>

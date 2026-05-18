@@ -185,10 +185,12 @@ export async function getFeaturedProducts(limit = 3): Promise<ProductWithDetails
   return products
 }
 
+/*
 export async function getRaffleEntries(): Promise<number[]> {
   const rows = await sql`SELECT number FROM raffle_entries ORDER BY number`
   return rows.map((r: { number: number }) => r.number)
 }
+*/
 
 export async function validateDiscountCode(code: string): Promise<{
   valid: boolean

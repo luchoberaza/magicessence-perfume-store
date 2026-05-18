@@ -40,6 +40,7 @@ interface Product {
   color_hex: string | null
   category_name: string | null
   featured: boolean
+  sale_by_order: boolean
   is_active: boolean
   images: ProductImage[] | null
   variants: Variant[] | null
@@ -67,6 +68,7 @@ export function ProductsTab() {
     color_hex: "",
     category_ids: [] as number[],
     featured: false,
+    sale_by_order: false,
     is_active: true,
   })
 
@@ -95,7 +97,7 @@ export function ProductsTab() {
 
   function openCreate() {
     setEditing(null)
-    setForm({ name: "", slug: "", brand: "", description: "", color_hex: "", category_ids: [], featured: false, is_active: true })
+    setForm({ name: "", slug: "", brand: "", description: "", color_hex: "", category_ids: [], featured: false, sale_by_order: false, is_active: true })
     setDialogOpen(true)
   }
 
@@ -112,6 +114,7 @@ export function ProductsTab() {
       color_hex: p.color_hex || "",
       category_ids: catIds,
       featured: p.featured,
+      sale_by_order: p.sale_by_order,
       is_active: p.is_active,
     })
     setDialogOpen(true)
@@ -234,6 +237,7 @@ export function ProductsTab() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-foreground">{p.name}</p>
                       {p.featured && <Badge variant="outline" className="text-primary border-primary/30 text-[10px]">Destacado</Badge>}
+                      {p.sale_by_order && <Badge variant="outline" className="text-amber-400 border-amber-400/30 text-[10px]">Encargue</Badge>}
                       {!p.is_active && <Badge variant="outline" className="text-destructive border-destructive/30 text-[10px]">Inactivo</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">{p.brand || "Sin marca"} - {p.category_name || "Sin categoria"}</p>
@@ -354,10 +358,14 @@ export function ProductsTab() {
               <Label className="text-foreground">Descripcion</Label>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="bg-secondary/50 resize-none" />
             </div>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-6">
               <div className="flex items-center gap-2">
                 <Switch checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: v })} id="featured" />
                 <Label htmlFor="featured" className="text-foreground">Destacado</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.sale_by_order} onCheckedChange={(v) => setForm({ ...form, sale_by_order: v })} id="sale_by_order" />
+                <Label htmlFor="sale_by_order" className="text-foreground">Venta encargue</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} id="active" />

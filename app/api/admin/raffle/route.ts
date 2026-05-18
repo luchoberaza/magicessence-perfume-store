@@ -1,3 +1,4 @@
+/*
 import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { sql } from "@/lib/db"
@@ -47,3 +48,4 @@ export async function DELETE(request: NextRequest) {
   revalidatePath("/rifa")
   return NextResponse.json({ success: true })
 }
+*/

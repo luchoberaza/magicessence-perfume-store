@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { getProducts, getCategories } from "@/lib/queries"
+import { PageHero } from "@/components/page-hero"
 import { ProductsGrid } from "./products-grid"
 
 export const metadata: Metadata = {
@@ -11,14 +12,16 @@ export default async function ProductosPage() {
   const [products, categories] = await Promise.all([getProducts(), getCategories()])
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Todos los productos</h1>
-        <p className="mt-2 text-muted-foreground">
-          {products.length} {products.length === 1 ? "fragancia" : "fragancias"} disponibles
-        </p>
+    <div>
+      <PageHero
+        title="Todos los productos"
+        highlight="productos"
+        subtitle={`${products.length} ${products.length === 1 ? "fragancia" : "fragancias"} disponibles`}
+      />
+
+      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+        <ProductsGrid initialProducts={products} categories={categories} />
       </div>
-      <ProductsGrid initialProducts={products} categories={categories} />
     </div>
   )
 }

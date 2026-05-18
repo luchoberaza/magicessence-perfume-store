@@ -45,7 +45,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   if (!(await isAuthenticated())) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-  const { name, slug, brand, description, category_id, category_ids, color_hex, featured, is_active } = await request.json()
+  const { name, slug, brand, description, category_id, category_ids, color_hex, featured, sale_by_order, is_active } = await request.json()
   const hex = normalizeHex(color_hex)
   if (color_hex && !hex) {
     return NextResponse.json({ error: "color_hex inválido (usa formato #RRGGBB)" }, { status: 400 })
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
 
   const primaryCategoryId = catIds[0] ?? (category_id ? parseInt(String(category_id)) : null)
   const rows = await sql`
-    INSERT INTO products (name, slug, brand, description, color_hex, category_id, featured, is_active)
-VALUES (${name}, ${slug}, ${brand || null}, ${description || null}, ${hex}, ${primaryCategoryId || null}, ${featured || false}, ${is_active !== false})
+    INSERT INTO products (name, slug, brand, description, color_hex, category_id, featured, sale_by_order, is_active)
+VALUES (${name}, ${slug}, ${brand || null}, ${description || null}, ${hex}, ${primaryCategoryId || null}, ${featured || false}, ${sale_by_order || false}, ${is_active !== false})
     RETURNING *
   `
   const created = rows[0] as { id: number } | undefined
@@ -75,7 +75,7 @@ VALUES (${name}, ${slug}, ${brand || null}, ${description || null}, ${hex}, ${pr
 
 export async function PUT(request: NextRequest) {
   if (!(await isAuthenticated())) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-  const { id, name, slug, brand, description, category_id, category_ids, color_hex, featured, is_active } = await request.json()
+  const { id, name, slug, brand, description, category_id, category_ids, color_hex, featured, sale_by_order, is_active } = await request.json()
   const hex = normalizeHex(color_hex)
   if (color_hex && !hex) {
     return NextResponse.json({ error: "color_hex inválido (usa formato #RRGGBB)" }, { status: 400 })
@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest) {
   const primaryCategoryId = catIds[0] ?? (category_id ? parseInt(String(category_id)) : null)
   const rows = await sql`
     UPDATE products SET name = ${name}, slug = ${slug}, brand = ${brand || null}, description = ${description || null},
-  color_hex = ${hex}, category_id = ${primaryCategoryId || null}, featured = ${featured || false}, is_active = ${is_active !== false}
+  color_hex = ${hex}, category_id = ${primaryCategoryId || null}, featured = ${featured || false}, sale_by_order = ${sale_by_order || false}, is_active = ${is_active !== false}
     WHERE id = ${id} RETURNING *
   `
   await sql`DELETE FROM product_categories WHERE product_id = ${id}`

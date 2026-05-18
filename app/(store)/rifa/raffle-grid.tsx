@@ -1,3 +1,4 @@
+/*
 "use client"
 
 import { useState } from "react"
@@ -56,7 +57,6 @@ export function RaffleGrid({ occupiedNumbers }: RaffleGridProps) {
 
   return (
     <>
-      {/* Legend */}
       <div className="mb-6 flex flex-wrap items-center justify-center gap-4 text-sm sm:gap-6">
         <div className="flex items-center gap-2">
           <span className="inline-block h-4 w-4 rounded border border-border bg-secondary/30" />
@@ -72,7 +72,6 @@ export function RaffleGrid({ occupiedNumbers }: RaffleGridProps) {
         </div>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-15">
         {Array.from({ length: 300 }, (_, i) => i + 1).map((n) => {
           const sold = occupiedSet.has(n)
@@ -112,7 +111,6 @@ export function RaffleGrid({ occupiedNumbers }: RaffleGridProps) {
         })}
       </div>
 
-      {/* Confirm dialog */}
       <AlertDialog
         open={confirmNumber !== null}
         onOpenChange={(open) => { if (!open) setConfirmNumber(null) }}
@@ -137,3 +135,4 @@ export function RaffleGrid({ occupiedNumbers }: RaffleGridProps) {
     </>
   )
 }
+*/

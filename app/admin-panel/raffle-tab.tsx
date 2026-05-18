@@ -1,3 +1,4 @@
+/*
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
@@ -196,3 +197,4 @@ export function RaffleTab({ onBack }: RaffleTabProps) {
     </div>
   )
 }
+*/

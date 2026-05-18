@@ -3,17 +3,18 @@
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { LogOut, LayoutGrid, Package, Percent, Ticket } from "lucide-react"
+import { LogOut, LayoutGrid, Package, Percent } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { CategoriesTab } from "./categories-tab"
 import { ProductsTab } from "./products-tab"
 import { DiscountsTab } from "./discounts-tab"
-import { RaffleTab } from "./raffle-tab"
+// import { Ticket } from "lucide-react"
+// import { RaffleTab } from "./raffle-tab"
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
-  const [view, setView] = useState<"dashboard" | "raffle">("dashboard")
+  const [view, setView] = useState<"dashboard" /* | "raffle" */>("dashboard")
 
   async function logout() {
     setLoggingOut(true)
@@ -29,14 +30,14 @@ export default function AdminDashboard() {
           <p className="text-sm text-muted-foreground">Mistic Essence</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             variant={view === "raffle" ? "default" : "outline"}
             size="sm"
             onClick={() => setView("raffle")}
           >
             <Ticket className="mr-2 h-4 w-4" />
             Rifa
-          </Button>
+          </Button> */}
           <Button variant="outline" size="sm" onClick={logout} disabled={loggingOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Salir
@@ -44,9 +45,9 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {view === "raffle" ? (
+      {/* {view === "raffle" ? (
         <RaffleTab onBack={() => setView("dashboard")} />
-      ) : (
+      ) : ( */}
         <Tabs defaultValue="products" className="space-y-4">
           <TabsList className="bg-secondary/50">
             <TabsTrigger value="categories" className="gap-2">
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
             <DiscountsTab />
           </TabsContent>
         </Tabs>
-      )}
+      {/* )} */}
     </div>
   )
 }

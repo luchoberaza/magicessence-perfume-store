@@ -1,3 +1,4 @@
+/*
 import { Wifi } from "lucide-react"
 import { getRaffleEntries } from "@/lib/queries"
 import { RaffleGrid } from "./raffle-grid"
@@ -14,7 +15,6 @@ export default async function RifaPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-      {/* Header */}
       <div className="mb-10 text-center">
         <h1 className="flex flex-wrap items-center justify-center gap-x-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
           <span style={{ color: "#f5e6ca" }}>Zona Cell</span>
@@ -31,10 +31,10 @@ export default async function RifaPage() {
 
       <RaffleGrid occupiedNumbers={occupiedNumbers} />
 
-      {/* Bottom note */}
       <p className="mt-8 text-center text-xs text-muted-foreground">
         Los estados se actualizan automaticamente. Para participar, consultanos por nuestras redes.
       </p>
     </div>
   )
 }
+*/
