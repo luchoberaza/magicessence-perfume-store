@@ -140,20 +140,22 @@ export default function AdminLoginPage() {
 
             <form onSubmit={handleSubmit} className="relative space-y-6 p-8">
               {/* Username */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
                   Usuario
                 </label>
-                <div className={`input-wrapper relative rounded-xl transition-all duration-300 ${focused === "user" ? "input-focused" : ""}`}>
-                  <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-violet-500/50 opacity-0 transition-opacity duration-300" style={{ opacity: focused === "user" ? 0.6 : 0 }} />
-                  <div className="relative flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/[0.06]">
-                    <User className="ml-4 h-4 w-4 shrink-0 text-white/20" />
+                <div className="relative rounded-2xl transition-all duration-300">
+                  <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-violet-500/50 transition-opacity duration-300" style={{ opacity: focused === "user" ? 0.5 : 0 }} />
+                  <div className="relative flex items-center gap-3 rounded-2xl bg-white/[0.04] px-5 ring-1 ring-white/[0.08] transition-all" style={{ boxShadow: focused === "user" ? "0 0 20px rgba(139,92,246,0.1)" : "none" }}>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+                      <User className="h-[18px] w-[18px] text-violet-300/50" />
+                    </div>
                     <input
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       onFocus={() => setFocused("user")}
                       onBlur={() => setFocused(null)}
-                      className="h-12 w-full bg-transparent px-3 text-sm text-white placeholder:text-white/20 focus:outline-none"
+                      className="h-14 w-full min-w-0 bg-transparent text-[15px] text-white placeholder:text-white/20 focus:outline-none"
                       placeholder="admin"
                       required
                     />
@@ -162,30 +164,32 @@ export default function AdminLoginPage() {
               </div>
 
               {/* Password */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
                   Contrasena
                 </label>
-                <div className={`input-wrapper relative rounded-xl transition-all duration-300 ${focused === "pass" ? "input-focused" : ""}`}>
-                  <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-violet-500/50 opacity-0 transition-opacity duration-300" style={{ opacity: focused === "pass" ? 0.6 : 0 }} />
-                  <div className="relative flex items-center rounded-xl bg-white/[0.04] ring-1 ring-white/[0.06]">
-                    <Lock className="ml-4 h-4 w-4 shrink-0 text-white/20" />
+                <div className="relative rounded-2xl transition-all duration-300">
+                  <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-violet-500/50 transition-opacity duration-300" style={{ opacity: focused === "pass" ? 0.5 : 0 }} />
+                  <div className="relative flex items-center gap-3 rounded-2xl bg-white/[0.04] px-5 ring-1 ring-white/[0.08] transition-all" style={{ boxShadow: focused === "pass" ? "0 0 20px rgba(139,92,246,0.1)" : "none" }}>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+                      <Lock className="h-[18px] w-[18px] text-violet-300/50" />
+                    </div>
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onFocus={() => setFocused("pass")}
                       onBlur={() => setFocused(null)}
-                      className="h-12 w-full bg-transparent px-3 text-sm text-white placeholder:text-white/20 focus:outline-none"
+                      className="h-14 w-full min-w-0 bg-transparent text-[15px] text-white placeholder:text-white/20 focus:outline-none"
                       placeholder="••••••••"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="mr-4 shrink-0 text-white/20 transition-colors hover:text-white/50"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/60"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                     </button>
                   </div>
                 </div>
