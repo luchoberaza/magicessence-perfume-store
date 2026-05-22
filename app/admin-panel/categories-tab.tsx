@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { Plus, Pencil, Trash2, Upload, X, ImageIcon, GripVertical } from "lucide-react"
+import { Plus, Pencil, Trash2, Upload, X, ImageIcon, FolderOpen } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -34,8 +34,7 @@ export function CategoriesTab() {
   async function fetchCategories() {
     setLoading(true)
     const res = await fetch("/api/admin/categories")
-    const data = await res.json()
-    setCategories(data)
+    setCategories(await res.json())
     setLoading(false)
   }
 
@@ -59,7 +58,7 @@ export function CategoriesTab() {
 
   function handleFileSelect(file: File) {
     if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imagenes"); return }
-    if (file.size > 5 * 1024 * 1024) { toast.error("La imagen no puede superar 5 MB"); return }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5 MB"); return }
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
   }
@@ -80,55 +79,38 @@ export function CategoriesTab() {
   async function handleSave() {
     setUploading(true)
     try {
-      const body = {
-        ...form,
-        sort_order: parseInt(form.sort_order) || 0,
-        image_url: editing?.image_url || null,
-        ...(editing ? { id: editing.id } : {}),
-      }
+      const body = { ...form, sort_order: parseInt(form.sort_order) || 0, image_url: editing?.image_url || null, ...(editing ? { id: editing.id } : {}) }
       const method = editing ? "PUT" : "POST"
       const res = await fetch("/api/admin/categories", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-      if (!res.ok) { toast.error("Error al guardar la categoria"); setUploading(false); return }
+      if (!res.ok) { toast.error("Error al guardar"); setUploading(false); return }
       const savedCat = await res.json()
 
       if (imageFile) {
         const fd = new FormData()
         fd.append("file", imageFile)
         fd.append("category_id", String(savedCat.id))
-        const uploadRes = await fetch("/api/admin/categories/image", { method: "POST", body: fd })
-        if (!uploadRes.ok) toast.error("Categoria guardada pero fallo la imagen")
+        await fetch("/api/admin/categories/image", { method: "POST", body: fd })
       }
 
       if (editing?.image_url && !imagePreview && !imageFile) {
-        await fetch("/api/admin/categories/image", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ category_id: savedCat.id, url: editing.image_url }),
-        })
+        await fetch("/api/admin/categories/image", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ category_id: savedCat.id, url: editing.image_url }) })
       }
 
-      toast.success(editing ? "Categoria actualizada" : "Categoria creada")
+      toast.success(editing ? "Actualizada" : "Creada")
       setDialogOpen(false)
       fetchCategories()
-    } catch {
-      toast.error("Error inesperado")
-    } finally {
-      setUploading(false)
-    }
+    } catch { toast.error("Error inesperado") }
+    finally { setUploading(false) }
   }
 
   async function handleDelete() {
     if (!deleteId) return
     const cat = categories.find((c) => c.id === deleteId)
     if (cat?.image_url) {
-      await fetch("/api/admin/categories/image", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category_id: deleteId, url: cat.image_url }),
-      }).catch(() => {})
+      await fetch("/api/admin/categories/image", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ category_id: deleteId, url: cat.image_url }) }).catch(() => {})
     }
     const res = await fetch("/api/admin/categories", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: deleteId }) })
-    if (res.ok) { toast.success("Categoria eliminada"); fetchCategories() }
+    if (res.ok) { toast.success("Eliminada"); fetchCategories() }
     setDeleteId(null)
   }
 
@@ -137,191 +119,146 @@ export function CategoriesTab() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Categorias</h2>
-          <p className="text-xs text-muted-foreground">{categories.length} categorias</p>
+          <p className="text-xs text-muted-foreground/50">{categories.length} categorias</p>
         </div>
-        <Button size="sm" onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Nueva</span>
+        <Button size="sm" onClick={openCreate} className="h-9 gap-1.5 bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20">
+          <Plus className="h-3.5 w-3.5" /> Nueva
         </Button>
       </div>
 
-      {/* List */}
+      {/* Grid */}
       {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-secondary/30" />
-          ))}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-white/[0.02]" />)}
         </div>
       ) : categories.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/40 py-16">
-          <ImageIcon className="mb-3 h-10 w-10 text-muted-foreground/30" />
-          <p className="text-sm text-muted-foreground">No hay categorias creadas</p>
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <FolderOpen className="mb-3 h-10 w-10 text-muted-foreground/15" />
+          <p className="text-sm text-muted-foreground/40">No hay categorias</p>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="group relative overflow-hidden rounded-2xl border border-border/30 bg-background/40 transition-all hover:border-border/50"
+              className="group relative overflow-hidden rounded-2xl border border-white/[0.04] bg-white/[0.02] transition-all hover:border-white/[0.08] hover:bg-white/[0.03]"
             >
-              <div className="flex items-center gap-3 p-3">
-                {/* Image */}
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-secondary/40">
-                  {cat.image_url ? (
-                    <img src={cat.image_url} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <ImageIcon className="h-5 w-5 text-muted-foreground/30" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-foreground">{cat.name}</p>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-mono">/{cat.slug}</span>
-                    <span className="text-border">|</span>
-                    <span>Orden: {cat.sort_order}</span>
+              {/* Cover image */}
+              <div className="aspect-[16/9] overflow-hidden bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5">
+                {cat.image_url ? (
+                  <img src={cat.image_url} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/10" />
                   </div>
-                </div>
+                )}
+              </div>
 
-                {/* Actions */}
-                <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                    onClick={() => openEdit(cat)}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => setDeleteId(cat.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+              {/* Info */}
+              <div className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold text-foreground">{cat.name}</p>
+                    <p className="mt-0.5 font-mono text-xs text-muted-foreground/40">/{cat.slug}</p>
+                  </div>
+                  <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-muted-foreground/50">
+                    #{cat.sort_order}
+                  </span>
                 </div>
+              </div>
+
+              {/* Hover actions */}
+              <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onClick={() => openEdit(cat)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={() => setDeleteId(cat.id)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-red-600"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Create / Edit Dialog */}
+      {/* Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-border/40 bg-background sm:max-w-md">
+        <DialogContent className="border-border/20 bg-[hsl(235,28%,8%)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-foreground">{editing ? "Editar" : "Nueva"} Categoria</DialogTitle>
           </DialogHeader>
-          <div className="space-y-5">
-            {/* Image upload */}
-            <div className="space-y-2">
-              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Foto</Label>
+          <div className="space-y-5 pt-2">
+            {/* Image */}
+            <div>
               {imagePreview ? (
-                <div className="relative overflow-hidden rounded-xl border border-border/30">
-                  <img src={imagePreview} alt="Preview" className="aspect-video w-full rounded-xl object-cover" />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    className="absolute right-2 top-2 h-8 w-8 rounded-full p-0 bg-black/50 hover:bg-black/70 text-white"
-                    onClick={removeImage}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                <div className="relative overflow-hidden rounded-xl ring-1 ring-white/[0.06]">
+                  <img src={imagePreview} alt="" className="aspect-video w-full object-cover" />
+                  <button onClick={removeImage} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ) : (
                 <div
                   className={cn(
-                    "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed py-8 transition-all",
-                    dragging
-                      ? "border-primary bg-primary/5"
-                      : "border-border/30 hover:border-primary/40 hover:bg-primary/[0.02]"
+                    "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed py-10 transition-all",
+                    dragging ? "border-violet-500/50 bg-violet-500/5" : "border-white/[0.06] hover:border-violet-500/30"
                   )}
                   onClick={() => fileInputRef.current?.click()}
                   onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
                   onDragLeave={() => setDragging(false)}
                   onDrop={handleDrop}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click() }}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/40">
-                    <Upload className="h-5 w-5 text-muted-foreground/60" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Arrastra o <span className="font-medium text-primary">hace click</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground/50">JPG, PNG o WebP. Max 5 MB.</p>
-                  </div>
+                  <Upload className="h-5 w-5 text-muted-foreground/30" />
+                  <p className="text-xs text-muted-foreground/50">Arrastra o <span className="text-violet-400">click</span></p>
                 </div>
               )}
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileSelect(file) }} />
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]) }} />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Nombre</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value, slug: editing ? form.slug : autoSlug(e.target.value) })}
-                className="border-border/40 bg-secondary/30 focus-visible:ring-primary/30"
-              />
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">Nombre</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: editing ? form.slug : autoSlug(e.target.value) })} className="h-9 border-border/20 bg-white/[0.03] text-sm" />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Slug</Label>
-                <Input
-                  value={form.slug}
-                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  className="border-border/40 bg-secondary/30 font-mono text-xs focus-visible:ring-primary/30"
-                />
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">Slug</Label>
+                <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="h-9 border-border/20 bg-white/[0.03] font-mono text-xs" />
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Orden</Label>
-                <Input
-                  type="number"
-                  value={form.sort_order}
-                  onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-                  className="border-border/40 bg-secondary/30 focus-visible:ring-primary/30"
-                />
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">Orden</Label>
+                <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} className="h-9 border-border/20 bg-white/[0.03] text-sm" />
               </div>
             </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-border/40">
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={uploading} className="bg-primary hover:bg-primary/90">
+          <DialogFooter className="gap-2 pt-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-muted-foreground">Cancelar</Button>
+            <Button onClick={handleSave} disabled={uploading} className="bg-violet-600 hover:bg-violet-500 text-white">
               {uploading ? "Guardando..." : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation */}
+      {/* Delete */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="border-border/40 bg-background">
+        <AlertDialogContent className="border-border/20 bg-[hsl(235,28%,8%)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground">Eliminar categoria</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta accion no se puede deshacer. Los productos asociados perderan la categoria.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Los productos asociados perderan esta categoria.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-border/40">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
+            <AlertDialogCancel className="border-border/20 bg-transparent text-muted-foreground">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 text-white hover:bg-red-500">Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
