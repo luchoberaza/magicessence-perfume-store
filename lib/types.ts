@@ -16,6 +16,7 @@ export interface Product {
   color_hex: string | null
   featured: boolean
   sale_by_order: boolean
+  encargue_price_int: number | null
   is_active: boolean
   created_at: string
 }

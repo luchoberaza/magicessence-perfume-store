@@ -1,0 +1,1 @@
+ALTER TABLE products ADD COLUMN IF NOT EXISTS encargue_price_int INTEGER DEFAULT NULL;

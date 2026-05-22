@@ -44,6 +44,7 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
     if (isOrderMode && selectedVariant === null) {
       if (!product.variants[0]) return
       const baseVariant = product.variants.find((v) => v.in_stock) || product.variants[0]
+      const encargueItemPrice = product.encargue_price_int ?? baseVariant.price_int
       addItem({
         variantId: ORDER_VARIANT_ID_OFFSET - product.id,
         productId: product.id,
@@ -51,7 +52,7 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
         productSlug: product.slug,
         variantName: "Sellado por encargue",
         ml: baseVariant.ml,
-        price: baseVariant.price_int,
+        price: encargueItemPrice,
         imageUrl: product.images[0]?.url || null,
       })
       toast.success("Agregado al carrito", {
@@ -92,9 +93,11 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
     }
   }
 
-  const displayPrice = isOrderMode
-    ? (product.variants.find((v) => v.in_stock)?.price_int ?? product.variants[0]?.price_int)
-    : selectedVariant?.price_int
+  const orderPrice = product.encargue_price_int
+    ?? product.variants.find((v) => v.in_stock)?.price_int
+    ?? product.variants[0]?.price_int
+
+  const displayPrice = isOrderMode ? orderPrice : selectedVariant?.price_int
 
   const canAdd = isOrderMode || (selectedVariant && selectedVariant.in_stock)
 
