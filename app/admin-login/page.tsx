@@ -18,6 +18,8 @@ export default function AdminLoginPage() {
   const router = useRouter()
 
   useEffect(() => {
+    const isTouch = window.matchMedia("(pointer: coarse)").matches
+    if (isTouch) return
     function handleMouse(e: MouseEvent) {
       if (!cardRef.current) return
       const rect = cardRef.current.getBoundingClientRect()
@@ -49,18 +51,18 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#050510] px-4">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#050510] px-5 py-8 sm:px-4 sm:py-0">
       {/* ── Animated aurora background ── */}
-      <div className="pointer-events-none fixed inset-0">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 opacity-60" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(120,60,255,0.15), transparent)" }} />
-        <div className="aurora-1 absolute -top-[40%] left-[10%] h-[800px] w-[600px] rounded-full opacity-30 blur-[100px]" />
-        <div className="aurora-2 absolute -top-[30%] right-[5%] h-[700px] w-[500px] rounded-full opacity-25 blur-[120px]" />
-        <div className="aurora-3 absolute top-[10%] left-[30%] h-[500px] w-[800px] rounded-full opacity-20 blur-[130px]" />
+        <div className="aurora-1 absolute -top-[40%] left-[10%] h-[400px] w-[300px] rounded-full opacity-30 blur-[80px] sm:h-[800px] sm:w-[600px] sm:blur-[100px]" />
+        <div className="aurora-2 absolute -top-[30%] right-[5%] h-[350px] w-[250px] rounded-full opacity-25 blur-[80px] sm:h-[700px] sm:w-[500px] sm:blur-[120px]" />
+        <div className="aurora-3 absolute top-[10%] left-[30%] h-[250px] w-[400px] rounded-full opacity-20 blur-[80px] sm:h-[500px] sm:w-[800px] sm:blur-[130px]" />
       </div>
 
       {/* ── Floating particles ── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        {Array.from({ length: 30 }).map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <div
             key={i}
             className="particle absolute h-[2px] w-[2px] rounded-full bg-white/40"
@@ -75,7 +77,7 @@ export default function AdminLoginPage() {
       </div>
 
       {/* ── Grid perspective floor ── */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden opacity-[0.04]">
+      <div className="pointer-events-none fixed inset-0 hidden overflow-hidden opacity-[0.04] sm:block">
         <div className="absolute inset-x-0 bottom-0 h-[60vh]" style={{ perspective: "500px" }}>
           <div
             className="h-full w-full border-t border-white/20"
@@ -91,8 +93,8 @@ export default function AdminLoginPage() {
       {/* ── Main content ── */}
       <div className="relative w-full max-w-[380px]">
         {/* Logo with orbiting rings */}
-        <div className="mb-10 flex flex-col items-center">
-          <div className="logo-container relative mb-5 flex h-20 w-20 items-center justify-center">
+        <div className="mb-6 flex flex-col items-center sm:mb-10">
+          <div className="logo-container relative mb-4 flex h-20 w-20 items-center justify-center sm:mb-5">
             {/* Orbiting rings */}
             <div className="orbit-ring absolute inset-0 rounded-full border border-violet-500/20" style={{ animation: "orbit 8s linear infinite" }} />
             <div className="orbit-ring absolute inset-[-8px] rounded-full border border-fuchsia-500/10" style={{ animation: "orbit 12s linear infinite reverse" }} />
@@ -129,16 +131,16 @@ export default function AdminLoginPage() {
           }}
         >
           {/* Animated gradient border */}
-          <div className="absolute -inset-[1px] rounded-3xl opacity-60 blur-[1px] gradient-border" />
+          <div className="absolute -inset-[1px] rounded-2xl opacity-60 blur-[1px] gradient-border sm:rounded-3xl" />
 
           {/* Card body */}
-          <div className="relative overflow-hidden rounded-3xl bg-[hsl(240,20%,6%)]/90 backdrop-blur-xl shadow-[0_25px_60px_rgba(0,0,0,0.5)]">
+          <div className="relative overflow-hidden rounded-2xl bg-[hsl(240,20%,6%)]/90 backdrop-blur-xl shadow-[0_25px_60px_rgba(0,0,0,0.5)] sm:rounded-3xl">
             {/* Inner glow top */}
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/40 to-transparent" />
             {/* Noise texture */}
             <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
 
-            <form onSubmit={handleSubmit} className="relative space-y-6 p-8">
+            <form onSubmit={handleSubmit} className="relative space-y-5 p-5 sm:space-y-6 sm:p-8">
               {/* Username */}
               <div className="space-y-2.5">
                 <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
@@ -146,16 +148,16 @@ export default function AdminLoginPage() {
                 </label>
                 <div className="relative rounded-2xl transition-all duration-300">
                   <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-violet-500/50 transition-opacity duration-300" style={{ opacity: focused === "user" ? 0.5 : 0 }} />
-                  <div className="relative flex items-center gap-3 rounded-2xl bg-white/[0.04] px-5 ring-1 ring-white/[0.08] transition-all" style={{ boxShadow: focused === "user" ? "0 0 20px rgba(139,92,246,0.1)" : "none" }}>
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
-                      <User className="h-[18px] w-[18px] text-violet-300/50" />
+                  <div className="relative flex items-center gap-2.5 rounded-2xl bg-white/[0.04] px-4 ring-1 ring-white/[0.08] transition-all sm:gap-3 sm:px-5" style={{ boxShadow: focused === "user" ? "0 0 20px rgba(139,92,246,0.1)" : "none" }}>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] sm:h-9 sm:w-9 sm:rounded-xl">
+                      <User className="h-4 w-4 text-violet-300/50 sm:h-[18px] sm:w-[18px]" />
                     </div>
                     <input
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       onFocus={() => setFocused("user")}
                       onBlur={() => setFocused(null)}
-                      className="h-14 w-full min-w-0 bg-transparent text-[15px] text-white placeholder:text-white/20 focus:outline-none"
+                      className="h-12 w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/20 focus:outline-none sm:h-14 sm:text-[15px]"
                       placeholder="admin"
                       required
                     />
@@ -170,9 +172,9 @@ export default function AdminLoginPage() {
                 </label>
                 <div className="relative rounded-2xl transition-all duration-300">
                   <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-violet-500/50 transition-opacity duration-300" style={{ opacity: focused === "pass" ? 0.5 : 0 }} />
-                  <div className="relative flex items-center gap-3 rounded-2xl bg-white/[0.04] px-5 ring-1 ring-white/[0.08] transition-all" style={{ boxShadow: focused === "pass" ? "0 0 20px rgba(139,92,246,0.1)" : "none" }}>
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
-                      <Lock className="h-[18px] w-[18px] text-violet-300/50" />
+                  <div className="relative flex items-center gap-2.5 rounded-2xl bg-white/[0.04] px-4 ring-1 ring-white/[0.08] transition-all sm:gap-3 sm:px-5" style={{ boxShadow: focused === "pass" ? "0 0 20px rgba(139,92,246,0.1)" : "none" }}>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] sm:h-9 sm:w-9 sm:rounded-xl">
+                      <Lock className="h-4 w-4 text-violet-300/50 sm:h-[18px] sm:w-[18px]" />
                     </div>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -180,16 +182,16 @@ export default function AdminLoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       onFocus={() => setFocused("pass")}
                       onBlur={() => setFocused(null)}
-                      className="h-14 w-full min-w-0 bg-transparent text-[15px] text-white placeholder:text-white/20 focus:outline-none"
+                      className="h-12 w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/20 focus:outline-none sm:h-14 sm:text-[15px]"
                       placeholder="••••••••"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/60"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-white/30 transition-colors active:bg-white/[0.1] active:text-white/60 sm:h-9 sm:w-9 sm:rounded-xl sm:hover:bg-white/[0.08] sm:hover:text-white/60"
                     >
-                      {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                      {showPassword ? <EyeOff className="h-4 w-4 sm:h-[18px] sm:w-[18px]" /> : <Eye className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />}
                     </button>
                   </div>
                 </div>
@@ -207,7 +209,7 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="submit-btn group relative h-12 w-full overflow-hidden rounded-xl font-medium text-white transition-all disabled:opacity-60"
+                className="submit-btn group relative h-11 w-full overflow-hidden rounded-xl font-medium text-white transition-all disabled:opacity-60 sm:h-12"
               >
                 {/* Button gradient bg */}
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] transition-all group-hover:bg-[position:100%_0]" style={{ animation: "shimmer 3s linear infinite" }} />
@@ -239,7 +241,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Decorative text */}
-        <p className="mt-10 text-center text-[9px] tracking-[0.4em] uppercase text-white/10">
+        <p className="mt-6 text-center text-[9px] tracking-[0.4em] uppercase text-white/10 sm:mt-10">
           Portal de acceso restringido
         </p>
       </div>
