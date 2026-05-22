@@ -132,7 +132,7 @@ export function CategoriesTab() {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {[1, 2, 3].map((i) => <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-white/[0.02]" />)}
         </div>
       ) : categories.length === 0 ? (
@@ -141,7 +141,7 @@ export function CategoriesTab() {
           <p className="text-sm text-muted-foreground/40">No hay categorias</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {categories.map((cat) => (
             <div
               key={cat.id}
@@ -171,17 +171,17 @@ export function CategoriesTab() {
                 </div>
               </div>
 
-              {/* Hover actions */}
-              <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              {/* Actions — always visible on mobile, hover on desktop */}
+              <div className="absolute right-3 top-3 flex gap-1 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
                 <button
                   onClick={() => openEdit(cat)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80 active:bg-black/80"
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 <button
                   onClick={() => setDeleteId(cat.id)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-red-600"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-red-600 active:bg-red-600"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>

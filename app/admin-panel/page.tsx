@@ -68,15 +68,14 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex h-[100dvh] overflow-hidden">
+      {/* ── Desktop sidebar ── */}
       <aside
         className={cn(
-          "relative flex flex-col border-r border-border/20 bg-[hsl(235,28%,7%)] transition-all duration-300",
+          "relative hidden flex-col border-r border-border/20 bg-[hsl(235,28%,7%)] transition-all duration-300 lg:flex",
           sidebarCollapsed ? "w-[68px]" : "w-[240px]"
         )}
       >
-        {/* Brand */}
         <div className="flex h-16 items-center gap-3 border-b border-border/10 px-4">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500">
             <Sparkles className="h-4 w-4 text-white" />
@@ -89,7 +88,6 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 space-y-1 p-3">
           {navigation.map((item) => (
             <button
@@ -102,46 +100,48 @@ export default function AdminDashboard() {
                   : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
               )}
             >
-              <item.icon className={cn(
-                "h-4 w-4 shrink-0 transition-colors",
-                view === item.id ? "text-violet-400" : "text-muted-foreground group-hover:text-foreground"
-              )} />
+              <item.icon className={cn("h-4 w-4 shrink-0 transition-colors", view === item.id ? "text-violet-400" : "text-muted-foreground group-hover:text-foreground")} />
               {!sidebarCollapsed && (
                 <>
                   <span className="flex-1 truncate text-left">{item.label}</span>
-                  <kbd className="hidden rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-muted-foreground/60 group-hover:block">
-                    {item.shortcut}
-                  </kbd>
+                  <kbd className="hidden rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-muted-foreground/60 group-hover:block">{item.shortcut}</kbd>
                 </>
               )}
             </button>
           ))}
         </nav>
 
-        {/* Sidebar footer */}
         <div className="border-t border-border/10 p-3">
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:text-muted-foreground"
-          >
+          <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:text-muted-foreground">
             <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", sidebarCollapsed ? "" : "rotate-180")} />
             {!sidebarCollapsed && <span>Colapsar</span>}
           </button>
-          <button
-            onClick={logout}
-            disabled={loggingOut}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:text-red-400"
-          >
+          <button onClick={logout} disabled={loggingOut} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs text-muted-foreground/60 transition-colors hover:text-red-400">
             <LogOut className="h-3.5 w-3.5 shrink-0" />
             {!sidebarCollapsed && <span>{loggingOut ? "Saliendo..." : "Cerrar sesion"}</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Top bar with stats */}
-        <div className="sticky top-0 z-10 border-b border-border/10 bg-background/80 backdrop-blur-xl">
+      {/* ── Main content ── */}
+      <main className="flex flex-1 flex-col overflow-hidden">
+        {/* Mobile header */}
+        <div className="flex items-center justify-between border-b border-border/10 bg-[hsl(235,28%,7%)] px-4 py-3 lg:hidden">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500">
+              <Sparkles className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">
+              {navigation.find((n) => n.id === view)?.label}
+            </span>
+          </div>
+          <button onClick={logout} disabled={loggingOut} className="rounded-lg p-2 text-muted-foreground/60 transition-colors active:bg-white/[0.04]">
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Desktop top bar */}
+        <div className="sticky top-0 z-10 hidden border-b border-border/10 bg-background/80 backdrop-blur-xl lg:block">
           <div className="flex items-center gap-6 px-8 py-4">
             <h1 className="text-lg font-semibold text-foreground">
               {navigation.find((n) => n.id === view)?.label}
@@ -153,10 +153,7 @@ export default function AdminDashboard() {
                 { label: "Categorias", value: stats.categories, icon: Layers },
                 { label: "Codigos", value: stats.discounts, icon: TrendingUp },
               ].map((s) => (
-                <div
-                  key={s.label}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs"
-                >
+                <div key={s.label} className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs">
                   <s.icon className="h-3 w-3 text-muted-foreground/50" />
                   <span className="font-mono font-semibold text-foreground">{s.value}</span>
                   <span className="text-muted-foreground/50">{s.label}</span>
@@ -166,13 +163,35 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-8">
+        {/* Content area */}
+        <div className="flex-1 overflow-y-auto p-4 pb-20 lg:p-8 lg:pb-8">
           {view === "products" && <ProductsTab />}
           {view === "categories" && <CategoriesTab />}
           {view === "discounts" && <DiscountsTab />}
         </div>
       </main>
+
+      {/* ── Mobile bottom nav ── */}
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/10 bg-[hsl(235,28%,7%)]/95 backdrop-blur-xl lg:hidden">
+        <div className="flex items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          {navigation.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setView(item.id)}
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-xl px-5 py-1.5 transition-all",
+                view === item.id ? "text-violet-400" : "text-muted-foreground/50 active:text-foreground"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="text-[10px] font-medium">{item.label}</span>
+              {view === item.id && (
+                <span className="absolute bottom-[max(0.25rem,env(safe-area-inset-bottom))] h-0.5 w-6 rounded-full bg-violet-400" />
+              )}
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   )
 }

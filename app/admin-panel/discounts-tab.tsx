@@ -112,7 +112,7 @@ export function DiscountsTab() {
               <div
                 key={d.id}
                 className={cn(
-                  "group flex items-center gap-4 rounded-2xl border px-5 py-4 transition-all",
+                  "group flex items-center gap-3 rounded-2xl border px-3 py-3 transition-all lg:gap-4 lg:px-5 lg:py-4",
                   isActive
                     ? "border-white/[0.04] bg-white/[0.02] hover:border-white/[0.08]"
                     : "border-white/[0.02] bg-white/[0.01] opacity-50"
@@ -167,12 +167,12 @@ export function DiscountsTab() {
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <button onClick={() => openEdit(d)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-white/[0.06] hover:text-foreground">
+                {/* Actions — always visible on mobile */}
+                <div className="flex gap-1 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
+                  <button onClick={() => openEdit(d)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-white/[0.06] hover:text-foreground active:bg-white/[0.06]">
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
-                  <button onClick={() => setDeleteId(d.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-red-500/10 hover:text-red-400">
+                  <button onClick={() => setDeleteId(d.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/40 transition-colors hover:bg-red-500/10 hover:text-red-400 active:bg-red-500/10 active:text-red-400">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
