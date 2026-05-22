@@ -514,16 +514,66 @@ export function ProductsTab() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Color (Hex)</Label>
+                <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Color del titulo</Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={form.color_hex}
-                    onChange={(e) => setForm({ ...form, color_hex: e.target.value })}
-                    placeholder="#RRGGBB"
-                    className="border-border/40 bg-secondary/30 font-mono text-xs focus-visible:ring-primary/30"
-                  />
+                  <div className="relative">
+                    <Input
+                      value={form.color_hex}
+                      onChange={(e) => setForm({ ...form, color_hex: e.target.value })}
+                      placeholder="#RRGGBB"
+                      className="border-border/40 bg-secondary/30 font-mono text-xs focus-visible:ring-primary/30 pr-10"
+                    />
+                    <label className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer">
+                      <input
+                        type="color"
+                        value={form.color_hex && /^#[0-9A-Fa-f]{6}$/i.test(form.color_hex) ? form.color_hex : "#a855f7"}
+                        onChange={(e) => setForm({ ...form, color_hex: e.target.value })}
+                        className="h-6 w-6 cursor-pointer appearance-none rounded-md border border-border/40 bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0.5 [&::-webkit-color-swatch]:rounded"
+                      />
+                    </label>
+                  </div>
                   {form.color_hex && /^#[0-9A-Fa-f]{6}$/.test(form.color_hex) && (
-                    <div className="h-9 w-9 shrink-0 rounded-lg border border-border/40" style={{ backgroundColor: form.color_hex }} />
+                    <div className="h-9 w-9 shrink-0 rounded-lg border border-border/40 shadow-inner" style={{ backgroundColor: form.color_hex }} />
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { hex: "#a855f7", name: "Violeta" },
+                    { hex: "#ec4899", name: "Rosa" },
+                    { hex: "#ef4444", name: "Rojo" },
+                    { hex: "#f97316", name: "Naranja" },
+                    { hex: "#eab308", name: "Dorado" },
+                    { hex: "#22c55e", name: "Verde" },
+                    { hex: "#06b6d4", name: "Cyan" },
+                    { hex: "#3b82f6", name: "Azul" },
+                    { hex: "#6366f1", name: "Indigo" },
+                    { hex: "#f5f5f4", name: "Blanco" },
+                    { hex: "#d4d4d4", name: "Gris" },
+                    { hex: "#78716c", name: "Piedra" },
+                  ].map((color) => (
+                    <button
+                      key={color.hex}
+                      type="button"
+                      title={color.name}
+                      onClick={() => setForm({ ...form, color_hex: color.hex })}
+                      className={cn(
+                        "h-6 w-6 rounded-full border-2 transition-all hover:scale-110",
+                        form.color_hex === color.hex
+                          ? "border-primary ring-2 ring-primary/30 scale-110"
+                          : "border-border/30 hover:border-border/60"
+                      )}
+                      style={{ backgroundColor: color.hex }}
+                    />
+                  ))}
+                  {form.color_hex && (
+                    <button
+                      type="button"
+                      title="Quitar color"
+                      onClick={() => setForm({ ...form, color_hex: "" })}
+                      className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border/30 text-muted-foreground/50 transition-all hover:border-destructive/50 hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   )}
                 </div>
               </div>
