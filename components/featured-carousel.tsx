@@ -9,7 +9,10 @@ import { ScaleOnHover, FadeIn, StaggerContainer, StaggerItem } from "./home-anim
 export function FeaturedCarousel({ products }: { products: ProductWithDetails[] }) {
   return (
     <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" staggerDelay={0.15}>
-      {products.map((product) => (
+      {products.map((product) => {
+        const hasOrder = product.has_order || (product.sale_by_order && product.encargue_price_int != null)
+        const orderPrice = product.order_min_price ?? product.encargue_price_int ?? null
+        return (
         <StaggerItem key={product.id}>
           <ScaleOnHover>
             <Link
@@ -29,12 +32,17 @@ export function FeaturedCarousel({ products }: { products: ProductWithDetails[] 
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                {!product.has_stock && (
+                {!product.has_stock && !hasOrder && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
                     <span className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                       Sin stock
                     </span>
                   </div>
+                )}
+                {!product.has_stock && hasOrder && (
+                  <Badge className="absolute right-3 top-3 border-0 bg-amber-500/90 text-amber-950 backdrop-blur-sm">
+                    Por encargue
+                  </Badge>
                 )}
                 {product.featured && product.has_stock && (
                   <Badge className="absolute left-3 top-3 border-0 bg-primary/90 text-primary-foreground backdrop-blur-sm">
@@ -64,6 +72,12 @@ export function FeaturedCarousel({ products }: { products: ProductWithDetails[] 
                       <span className="text-xs font-normal text-muted-foreground">desde </span>
                       {formatUYU(product.min_price)}
                     </p>
+                  ) : hasOrder && orderPrice != null ? (
+                    <p className="text-base font-bold text-amber-400">
+                      <span className="text-xs font-normal text-muted-foreground">desde </span>
+                      {formatUYU(orderPrice)}
+                      <span className="ml-1 text-xs font-normal text-amber-400/70">(encargue)</span>
+                    </p>
                   ) : (
                     <p className="text-sm font-medium text-muted-foreground">Sin stock</p>
                   )}
@@ -72,7 +86,8 @@ export function FeaturedCarousel({ products }: { products: ProductWithDetails[] 
             </Link>
           </ScaleOnHover>
         </StaggerItem>
-      ))}
+        )
+      })}
     </StaggerContainer>
   )
 }

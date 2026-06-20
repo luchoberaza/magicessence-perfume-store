@@ -17,10 +17,10 @@ function revalidateStore() {
 
 export async function POST(request: NextRequest) {
   if (!(await isAuthenticated())) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-  const { product_id, name, ml, price_int, in_stock, is_active } = await request.json()
+  const { product_id, name, ml, price_int, in_stock, is_active, by_order } = await request.json()
   const rows = await sql`
-    INSERT INTO variants (product_id, name, ml, price_int, in_stock, is_active)
-    VALUES (${product_id}, ${name}, ${ml || null}, ${price_int}, ${in_stock !== false}, ${is_active !== false})
+    INSERT INTO variants (product_id, name, ml, price_int, in_stock, is_active, by_order)
+    VALUES (${product_id}, ${name}, ${ml || null}, ${price_int}, ${in_stock !== false}, ${is_active !== false}, ${by_order === true})
     RETURNING *
   `
   revalidateStore()
@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   if (!(await isAuthenticated())) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-  const { id, name, ml, price_int, in_stock, is_active } = await request.json()
+  const { id, name, ml, price_int, in_stock, is_active, by_order } = await request.json()
   const rows = await sql`
-    UPDATE variants SET name = ${name}, ml = ${ml || null}, price_int = ${price_int}, in_stock = ${in_stock}, is_active = ${is_active}
+    UPDATE variants SET name = ${name}, ml = ${ml || null}, price_int = ${price_int}, in_stock = ${in_stock}, is_active = ${is_active}, by_order = ${by_order === true}
     WHERE id = ${id} RETURNING *
   `
   revalidateStore()

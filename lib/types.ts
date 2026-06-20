@@ -36,6 +36,7 @@ export interface Variant {
   price_int: number
   in_stock: boolean
   is_active: boolean
+  by_order: boolean
 }
 
 export interface DiscountCode {
@@ -56,4 +57,6 @@ export interface ProductWithDetails extends Product {
   category_ids?: number[]
   min_price: number | null
   has_stock: boolean
+  order_min_price?: number | null
+  has_order?: boolean
 }

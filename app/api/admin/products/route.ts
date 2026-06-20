@@ -35,7 +35,7 @@ export async function GET() {
         WHERE cid IS NOT NULL
       ) as category_ids,
       (SELECT json_agg(json_build_object('id', pi.id, 'url', pi.url, 'sort_order', pi.sort_order) ORDER BY pi.sort_order) FROM product_images pi WHERE pi.product_id = p.id) as images,
-      (SELECT json_agg(json_build_object('id', v.id, 'name', v.name, 'ml', v.ml, 'price_int', v.price_int, 'in_stock', v.in_stock, 'is_active', v.is_active) ORDER BY v.price_int) FROM variants v WHERE v.product_id = p.id) as variants
+      (SELECT json_agg(json_build_object('id', v.id, 'name', v.name, 'ml', v.ml, 'price_int', v.price_int, 'in_stock', v.in_stock, 'is_active', v.is_active, 'by_order', v.by_order) ORDER BY v.price_int) FROM variants v WHERE v.product_id = p.id) as variants
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     ORDER BY p.created_at DESC

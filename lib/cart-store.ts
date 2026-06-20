@@ -23,6 +23,10 @@ interface CartState {
 
 const STORAGE_KEY = "mistic-cart"
 
+// Los items "por encargue" usan un variantId derivado de este offset para no
+// colisionar con la variante de stock del mismo producto (variantId = OFFSET - id).
+export const ORDER_VARIANT_ID_OFFSET = -10000
+
 const DEFAULT_STATE: CartState = { items: [], discountCode: null, discountType: null, discountValue: 0 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -62,7 +66,8 @@ function sanitizeCartItem(v: unknown): CartItem | null {
   const quantity = asInt(v.quantity, 0)
 
   const isRaffleItem = variantId <= -1 && variantId >= -300 && productId === 0
-  if (!isRaffleItem && (variantId < 0 || productId < 0)) return null
+  const isOrderItem = variantId <= ORDER_VARIANT_ID_OFFSET && productId > 0
+  if (!isRaffleItem && !isOrderItem && (variantId < 0 || productId < 0)) return null
   if (!productName || !productSlug || !variantName) return null
   if (!Number.isFinite(price) || price < 0) return null
   if (quantity <= 0) return null

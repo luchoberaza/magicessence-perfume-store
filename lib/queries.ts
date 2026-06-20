@@ -30,8 +30,10 @@ export async function getProducts(options?: {
           ) t
           WHERE cid IS NOT NULL
         ) as category_ids,
-        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
-        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as has_stock,
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as order_min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as has_order
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.is_active = true
@@ -54,8 +56,10 @@ export async function getProducts(options?: {
           ) t
           WHERE cid IS NOT NULL
         ) as category_ids,
-        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
-        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as has_stock,
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as order_min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as has_order
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.is_active = true
@@ -78,8 +82,10 @@ export async function getProducts(options?: {
           ) t
           WHERE cid IS NOT NULL
         ) as category_ids,
-        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
-        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as has_stock,
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as order_min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as has_order
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.is_active = true AND p.featured = true
@@ -98,8 +104,10 @@ export async function getProducts(options?: {
           ) t
           WHERE cid IS NOT NULL
         ) as category_ids,
-        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
-        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as has_stock,
+        (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as order_min_price,
+        EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as has_order
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.is_active = true
@@ -134,8 +142,10 @@ export async function getProductBySlug(slug: string): Promise<ProductWithDetails
         ) t
         WHERE cid IS NOT NULL
       ) as category_ids,
-      (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
-      EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
+      (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as min_price,
+      EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as has_stock,
+      (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as order_min_price,
+      EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as has_order
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     WHERE p.slug = ${slug} AND p.is_active = true
@@ -166,8 +176,10 @@ export async function getFeaturedProducts(limit = 3): Promise<ProductWithDetails
         ) t
         WHERE cid IS NOT NULL
       ) as category_ids,
-      (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as min_price,
-      EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true) as has_stock
+      (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as min_price,
+      EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.in_stock = true AND v.by_order = false) as has_stock,
+      (SELECT MIN(v.price_int) FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as order_min_price,
+      EXISTS(SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = true AND v.by_order = true) as has_order
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     WHERE p.is_active = true

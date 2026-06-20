@@ -17,7 +17,7 @@ import { toast } from "sonner"
 import { formatUYU } from "@/lib/currency"
 import { cn } from "@/lib/utils"
 
-interface Variant { id: number; name: string; ml: number | null; price_int: number; in_stock: boolean; is_active: boolean }
+interface Variant { id: number; name: string; ml: number | null; price_int: number; in_stock: boolean; is_active: boolean; by_order: boolean }
 interface ProductImage { id: number; url: string; sort_order: number }
 interface Product {
   id: number; name: string; slug: string; brand: string | null; description: string | null
@@ -54,7 +54,7 @@ export function ProductsTab() {
   })
   const [variantDialogOpen, setVariantDialogOpen] = useState(false)
   const [variantProduct, setVariantProduct] = useState<Product | null>(null)
-  const [variantForm, setVariantForm] = useState({ name: "", ml: "", price_int: "", in_stock: true, is_active: true })
+  const [variantForm, setVariantForm] = useState({ name: "", ml: "", price_int: "", in_stock: true, is_active: true, by_order: false })
   const [editingVariant, setEditingVariant] = useState<Variant | null>(null)
 
   const fetchAll = useCallback(async () => {
@@ -108,11 +108,11 @@ export function ProductsTab() {
     if (res.ok) { toast.success("Imagen eliminada"); fetchAll() }
   }
 
-  function openVariantCreate(p: Product) { setVariantProduct(p); setEditingVariant(null); setVariantForm({ name: "", ml: "", price_int: "", in_stock: true, is_active: true }); setVariantDialogOpen(true) }
-  function openVariantEdit(p: Product, v: Variant) { setVariantProduct(p); setEditingVariant(v); setVariantForm({ name: v.name, ml: v.ml ? String(v.ml) : "", price_int: String(v.price_int), in_stock: v.in_stock, is_active: v.is_active }); setVariantDialogOpen(true) }
+  function openVariantCreate(p: Product) { setVariantProduct(p); setEditingVariant(null); setVariantForm({ name: "", ml: "", price_int: "", in_stock: true, is_active: true, by_order: false }); setVariantDialogOpen(true) }
+  function openVariantEdit(p: Product, v: Variant) { setVariantProduct(p); setEditingVariant(v); setVariantForm({ name: v.name, ml: v.ml ? String(v.ml) : "", price_int: String(v.price_int), in_stock: v.in_stock, is_active: v.is_active, by_order: v.by_order }); setVariantDialogOpen(true) }
 
   async function handleVariantSave() {
-    const body = { product_id: variantProduct!.id, name: variantForm.name, ml: variantForm.ml ? parseInt(variantForm.ml) : null, price_int: parseInt(variantForm.price_int), in_stock: variantForm.in_stock, is_active: variantForm.is_active, ...(editingVariant ? { id: editingVariant.id } : {}) }
+    const body = { product_id: variantProduct!.id, name: variantForm.name, ml: variantForm.ml ? parseInt(variantForm.ml) : null, price_int: parseInt(variantForm.price_int), in_stock: variantForm.in_stock, is_active: variantForm.is_active, by_order: variantForm.by_order, ...(editingVariant ? { id: editingVariant.id } : {}) }
     const method = editingVariant ? "PUT" : "POST"
     const res = await fetch("/api/admin/variants", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
     if (res.ok) { toast.success(editingVariant ? "Variante actualizada" : "Variante creada"); setVariantDialogOpen(false); fetchAll() }
@@ -207,12 +207,17 @@ export function ProductsTab() {
             <div className="space-y-1">
               {selectedProduct.variants.map((v) => (
                 <div key={v.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/[0.02]">
-                  <button onClick={() => toggleVariantStock(v)} className="shrink-0">
-                    <CircleDot className={cn("h-4 w-4 transition-colors", v.in_stock ? "text-emerald-400" : "text-muted-foreground/30")} />
-                  </button>
+                  {v.by_order ? (
+                    <span className="shrink-0" title="Por encargue"><Package className="h-4 w-4 text-amber-400" /></span>
+                  ) : (
+                    <button onClick={() => toggleVariantStock(v)} className="shrink-0">
+                      <CircleDot className={cn("h-4 w-4 transition-colors", v.in_stock ? "text-emerald-400" : "text-muted-foreground/30")} />
+                    </button>
+                  )}
                   <div className="min-w-0 flex-1">
-                    <span className={cn("text-sm font-medium", v.in_stock ? "text-foreground" : "text-muted-foreground/50 line-through")}>{v.name}</span>
+                    <span className={cn("text-sm font-medium", v.by_order || v.in_stock ? "text-foreground" : "text-muted-foreground/50 line-through")}>{v.name}</span>
                     {v.ml && <span className="ml-1.5 text-xs text-muted-foreground/40">{v.ml}ml</span>}
+                    {v.by_order && <span className="ml-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-400">encargue</span>}
                   </div>
                   <span className="shrink-0 font-mono text-sm font-semibold text-foreground/80">{formatUYU(v.price_int)}</span>
                   <button onClick={() => openVariantEdit(selectedProduct, v)} className="rounded-md p-1.5 text-muted-foreground/40 active:bg-white/[0.06] lg:hover:bg-white/[0.06] lg:hover:text-foreground">
@@ -267,8 +272,10 @@ export function ProductsTab() {
             ) : (
               filtered.map((p) => {
                 const isSelected = selectedProduct?.id === p.id
-                const stockCount = p.variants?.filter((v) => v.in_stock).length ?? 0
-                const totalVariants = p.variants?.length ?? 0
+                const stockVariants = p.variants?.filter((v) => !v.by_order) ?? []
+                const orderCount = p.variants?.filter((v) => v.by_order).length ?? 0
+                const stockCount = stockVariants.filter((v) => v.in_stock).length
+                const totalVariants = stockVariants.length
                 const minP = p.variants?.length ? Math.min(...p.variants.map((v) => v.price_int)) : null
 
                 return (
@@ -293,6 +300,7 @@ export function ProductsTab() {
                       <div className="flex items-center gap-2 text-[11px] text-muted-foreground/60">
                         <span>{p.brand || "—"}</span>
                         {totalVariants > 0 && <><span className="text-border/40">·</span><span className={stockCount > 0 ? "text-emerald-400/70" : ""}>{stockCount}/{totalVariants}</span></>}
+                        {orderCount > 0 && <><span className="text-border/40">·</span><span className="text-amber-400/70">{orderCount} enc</span></>}
                       </div>
                     </div>
                     {minP != null && <span className="shrink-0 font-mono text-xs font-medium text-muted-foreground">{formatUYU(minP)}</span>}
@@ -434,10 +442,21 @@ export function ProductsTab() {
               <div className="space-y-1.5"><Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">ml</Label><Input type="number" value={variantForm.ml} onChange={(e) => setVariantForm({ ...variantForm, ml: e.target.value })} className="h-9 border-border/20 bg-white/[0.03] text-sm" /></div>
               <div className="space-y-1.5"><Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">Precio UYU</Label><Input type="number" value={variantForm.price_int} onChange={(e) => setVariantForm({ ...variantForm, price_int: e.target.value })} className="h-9 border-border/20 bg-white/[0.03] text-sm" /></div>
             </div>
-            <div className="flex gap-4 rounded-xl bg-white/[0.02] px-4 py-3 ring-1 ring-white/[0.06]">
-              <div className="flex items-center gap-2"><Switch checked={variantForm.in_stock} onCheckedChange={(v) => setVariantForm({ ...variantForm, in_stock: v })} className="data-[state=checked]:bg-emerald-500" /><span className="text-sm text-foreground">Stock</span></div>
-              <div className="flex items-center gap-2"><Switch checked={variantForm.is_active} onCheckedChange={(v) => setVariantForm({ ...variantForm, is_active: v })} className="data-[state=checked]:bg-violet-500" /><span className="text-sm text-foreground">Activa</span></div>
+            <div className="space-y-0 divide-y divide-border/10 rounded-xl bg-white/[0.02] ring-1 ring-white/[0.06]">
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2.5"><Package className="h-3.5 w-3.5 text-amber-400/70" /><span className="text-sm text-foreground">Por encargue</span></div>
+                <Switch checked={variantForm.by_order} onCheckedChange={(v) => setVariantForm({ ...variantForm, by_order: v })} className="data-[state=checked]:bg-amber-500" />
+              </div>
+              <div className={cn("flex items-center justify-between px-4 py-3 transition-opacity", variantForm.by_order && "opacity-40")}>
+                <div className="flex items-center gap-2.5"><CircleDot className="h-3.5 w-3.5 text-emerald-400/70" /><span className="text-sm text-foreground">Stock inmediato</span></div>
+                <Switch checked={variantForm.in_stock} disabled={variantForm.by_order} onCheckedChange={(v) => setVariantForm({ ...variantForm, in_stock: v })} className="data-[state=checked]:bg-emerald-500" />
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2.5">{variantForm.is_active ? <Eye className="h-3.5 w-3.5 text-emerald-400/70" /> : <EyeOff className="h-3.5 w-3.5 text-muted-foreground/50" />}<span className="text-sm text-foreground">Activa</span></div>
+                <Switch checked={variantForm.is_active} onCheckedChange={(v) => setVariantForm({ ...variantForm, is_active: v })} className="data-[state=checked]:bg-violet-500" />
+              </div>
             </div>
+            {variantForm.by_order && <p className="pl-1 text-[10px] leading-relaxed text-amber-400/60">Esta presentacion se vende por encargue: no descuenta stock y muestra la advertencia de demora (24/72hs) en la tienda.</p>}
           </div>
           <DialogFooter className="gap-2 pt-2 sm:gap-0"><Button variant="ghost" onClick={() => setVariantDialogOpen(false)} className="text-muted-foreground">Cancelar</Button><Button onClick={handleVariantSave} className="bg-violet-600 hover:bg-violet-500 text-white">Guardar</Button></DialogFooter>
         </DialogContent>

@@ -4,55 +4,113 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingBag, Clock, Package, AlertTriangle, X, Sparkles } from "lucide-react"
-import { useCart } from "@/lib/cart-store"
+import { ShoppingBag, Clock, Package, X, Sparkles } from "lucide-react"
+import { useCart, ORDER_VARIANT_ID_OFFSET } from "@/lib/cart-store"
 import { formatUYU } from "@/lib/currency"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import type { ProductWithDetails } from "@/lib/types"
-
-const ORDER_VARIANT_ID_OFFSET = -10000
+import type { ProductWithDetails, Variant } from "@/lib/types"
 
 export function ProductDetail({ product }: { product: ProductWithDetails }) {
   const { addItem } = useCart()
-  const [selectedVariant, setSelectedVariant] = useState(
-    product.variants.find((v) => v.in_stock) || product.variants[0] || null
+
+  const stockVariants = product.variants.filter((v) => !v.by_order)
+  const orderVariants = product.variants.filter((v) => v.by_order)
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(
+    stockVariants.find((v) => v.in_stock) || stockVariants[0] || null
   )
   const [selectedImage, setSelectedImage] = useState(0)
-  const [isOrderMode, setIsOrderMode] = useState(false)
+  const [isLegacyOrder, setIsLegacyOrder] = useState(false)
   const [showOrderWarning, setShowOrderWarning] = useState(false)
+  const [orderAck, setOrderAck] = useState(false)
+  // Variante de encargue pendiente de confirmar; "legacy" = boton unico de encargue.
+  const [pendingOrder, setPendingOrder] = useState<Variant | "legacy" | null>(null)
 
   const hasAnyStock = product.has_stock
+  const hasOrderOption = orderVariants.length > 0 || product.sale_by_order
+  const orderSelected = isLegacyOrder || !!selectedVariant?.by_order
 
-  function handleSelectOrder() {
-    setShowOrderWarning(true)
+  function handleSelectStock(variant: Variant) {
+    if (!variant.in_stock) return
+    setIsLegacyOrder(false)
+    setSelectedVariant(variant)
+  }
+
+  function handleSelectOrderVariant(variant: Variant) {
+    setIsLegacyOrder(false)
+    if (orderAck) {
+      setSelectedVariant(variant)
+    } else {
+      setPendingOrder(variant)
+      setShowOrderWarning(true)
+    }
+  }
+
+  function handleSelectLegacyOrder() {
+    if (orderAck) {
+      setIsLegacyOrder(true)
+      setSelectedVariant(null)
+    } else {
+      setPendingOrder("legacy")
+      setShowOrderWarning(true)
+    }
   }
 
   function handleConfirmOrder() {
     setShowOrderWarning(false)
-    setIsOrderMode(true)
-    setSelectedVariant(null)
+    setOrderAck(true)
+    if (pendingOrder === "legacy") {
+      setIsLegacyOrder(true)
+      setSelectedVariant(null)
+    } else if (pendingOrder) {
+      setSelectedVariant(pendingOrder)
+      setIsLegacyOrder(false)
+    }
+    setPendingOrder(null)
   }
 
-  function handleSelectVariant(variant: typeof product.variants[0]) {
-    if (!variant.in_stock) return
-    setIsOrderMode(false)
-    setSelectedVariant(variant)
+  function handleCancelOrder() {
+    setShowOrderWarning(false)
+    setPendingOrder(null)
   }
+
+  const legacyOrderPrice =
+    product.encargue_price_int ??
+    stockVariants.find((v) => v.in_stock)?.price_int ??
+    stockVariants[0]?.price_int ??
+    orderVariants[0]?.price_int
+
+  const minOrderPrice = orderVariants.length
+    ? Math.min(...orderVariants.map((v) => v.price_int))
+    : null
+
+  const displayPrice = isLegacyOrder ? legacyOrderPrice : selectedVariant?.price_int
+
+  const canAdd =
+    isLegacyOrder || (!!selectedVariant && (selectedVariant.by_order || selectedVariant.in_stock))
+
+  const buttonLabel = orderSelected
+    ? "Encargar ahora"
+    : selectedVariant?.in_stock
+      ? "Agregar al carrito"
+      : hasAnyStock || hasOrderOption
+        ? "Elegí una opción"
+        : "Sin stock"
 
   function handleAdd() {
-    if (isOrderMode && selectedVariant === null) {
-      if (!product.variants[0]) return
-      const baseVariant = product.variants.find((v) => v.in_stock) || product.variants[0]
-      const encargueItemPrice = product.encargue_price_int ?? baseVariant.price_int
+    if (isLegacyOrder) {
+      const baseVariant = stockVariants.find((v) => v.in_stock) || stockVariants[0] || orderVariants[0]
+      const price = product.encargue_price_int ?? baseVariant?.price_int
+      if (price == null) return
       addItem({
         variantId: ORDER_VARIANT_ID_OFFSET - product.id,
         productId: product.id,
         productName: product.name,
         productSlug: product.slug,
         variantName: "Sellado por encargue",
-        ml: baseVariant.ml,
-        price: encargueItemPrice,
+        ml: baseVariant?.ml ?? null,
+        price,
         imageUrl: product.images[0]?.url || null,
       })
       toast.success("Agregado al carrito", {
@@ -61,45 +119,41 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
       return
     }
 
-    if (!selectedVariant || !selectedVariant.in_stock) return
-    if (isOrderMode) {
+    if (!selectedVariant) return
+
+    if (selectedVariant.by_order) {
+      const label = `${selectedVariant.name}${selectedVariant.ml ? ` ${selectedVariant.ml}ml` : ""} (Encargue)`
       addItem({
         variantId: ORDER_VARIANT_ID_OFFSET - selectedVariant.id,
         productId: product.id,
         productName: product.name,
         productSlug: product.slug,
-        variantName: `${selectedVariant.name} (Encargue)`,
+        variantName: label,
         ml: selectedVariant.ml,
         price: selectedVariant.price_int,
         imageUrl: product.images[0]?.url || null,
       })
       toast.success("Agregado al carrito", {
-        description: `${product.name} - ${selectedVariant.name} (Encargue)`,
+        description: `${product.name} - ${label}`,
       })
-    } else {
-      addItem({
-        variantId: selectedVariant.id,
-        productId: product.id,
-        productName: product.name,
-        productSlug: product.slug,
-        variantName: selectedVariant.name,
-        ml: selectedVariant.ml,
-        price: selectedVariant.price_int,
-        imageUrl: product.images[0]?.url || null,
-      })
-      toast.success("Agregado al carrito", {
-        description: `${product.name} - ${selectedVariant.name}`,
-      })
+      return
     }
+
+    if (!selectedVariant.in_stock) return
+    addItem({
+      variantId: selectedVariant.id,
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      variantName: selectedVariant.name,
+      ml: selectedVariant.ml,
+      price: selectedVariant.price_int,
+      imageUrl: product.images[0]?.url || null,
+    })
+    toast.success("Agregado al carrito", {
+      description: `${product.name} - ${selectedVariant.name}`,
+    })
   }
-
-  const orderPrice = product.encargue_price_int
-    ?? product.variants.find((v) => v.in_stock)?.price_int
-    ?? product.variants[0]?.price_int
-
-  const displayPrice = isOrderMode ? orderPrice : selectedVariant?.price_int
-
-  const canAdd = isOrderMode || (selectedVariant && selectedVariant.in_stock)
 
   return (
     <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
@@ -117,17 +171,17 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
               Sin imagen
             </div>
           )}
-          {!hasAnyStock && !product.sale_by_order && (
+          {!hasAnyStock && !hasOrderOption && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
               <span className="rounded-xl bg-secondary px-6 py-3 text-lg font-bold uppercase tracking-wider text-muted-foreground">
                 Sin stock
               </span>
             </div>
           )}
-          {product.sale_by_order && (
+          {hasOrderOption && (
             <Badge className="absolute right-3 top-3 border-0 bg-amber-500/90 text-amber-950 backdrop-blur-sm">
               <Package className="mr-1 h-3 w-3" />
-              Venta por encargue
+              {hasAnyStock ? "Disponible por encargue" : "Venta por encargue"}
             </Badge>
           )}
         </div>
@@ -181,28 +235,34 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
         )}
 
         {/* Price */}
-        {displayPrice != null && (
+        {displayPrice != null ? (
           <p className="text-3xl font-bold text-foreground">
             {formatUYU(displayPrice)}
-            {isOrderMode && (
+            {orderSelected && (
               <span className="ml-2 text-sm font-normal text-amber-400">(encargue)</span>
             )}
           </p>
-        )}
+        ) : minOrderPrice != null ? (
+          <p className="text-3xl font-bold text-foreground">
+            <span className="text-sm font-normal text-muted-foreground">desde </span>
+            {formatUYU(minOrderPrice)}
+            <span className="ml-2 text-sm font-normal text-amber-400">(encargue)</span>
+          </p>
+        ) : null}
 
-        {/* Variants */}
-        {product.variants.length > 0 && (
+        {/* Stock variants */}
+        {stockVariants.length > 0 && (
           <div className="space-y-3">
             <p className="text-sm font-medium text-muted-foreground">Variante</p>
             <div className="flex flex-wrap gap-2">
-              {product.variants.map((variant) => (
+              {stockVariants.map((variant) => (
                 <button
                   key={variant.id}
-                  onClick={() => handleSelectVariant(variant)}
+                  onClick={() => handleSelectStock(variant)}
                   disabled={!variant.in_stock}
                   className={cn(
                     "rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
-                    !isOrderMode && selectedVariant?.id === variant.id
+                    !orderSelected && selectedVariant?.id === variant.id
                       ? "border-primary bg-primary/10 text-primary"
                       : variant.in_stock
                         ? "border-border bg-secondary/50 text-foreground hover:border-primary/50"
@@ -214,23 +274,58 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
                   {!variant.in_stock && " (Sin stock)"}
                 </button>
               ))}
-
-              {/* Sale by order option */}
-              {product.sale_by_order && (
-                <button
-                  onClick={handleSelectOrder}
-                  className={cn(
-                    "rounded-xl border px-4 py-2.5 text-sm font-medium transition-all flex items-center gap-1.5",
-                    isOrderMode
-                      ? "border-amber-400/60 bg-amber-400/10 text-amber-400"
-                      : "border-amber-400/30 bg-amber-400/5 text-amber-400/80 hover:border-amber-400/50 hover:bg-amber-400/10"
-                  )}
-                >
-                  <Package className="h-3.5 w-3.5" />
-                  Sellado por encargue
-                </button>
-              )}
             </div>
+          </div>
+        )}
+
+        {/* Order variants (por encargue, multiples presentaciones) */}
+        {orderVariants.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-amber-400" />
+              <p className="text-sm font-medium text-amber-400">Por encargue</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {orderVariants.map((variant) => {
+                const isSel = orderSelected && selectedVariant?.id === variant.id
+                return (
+                  <button
+                    key={variant.id}
+                    onClick={() => handleSelectOrderVariant(variant)}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
+                      isSel
+                        ? "border-amber-400/60 bg-amber-400/10 text-amber-400"
+                        : "border-amber-400/30 bg-amber-400/5 text-amber-400/80 hover:border-amber-400/50 hover:bg-amber-400/10"
+                    )}
+                  >
+                    <span>
+                      {variant.name}
+                      {variant.ml ? ` ${variant.ml}ml` : ""}
+                    </span>
+                    <span className="opacity-70">· {formatUYU(variant.price_int)}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Legacy single order option (compat: producto por encargue sin variantes by_order) */}
+        {product.sale_by_order && orderVariants.length === 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleSelectLegacyOrder}
+              className={cn(
+                "flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
+                isLegacyOrder
+                  ? "border-amber-400/60 bg-amber-400/10 text-amber-400"
+                  : "border-amber-400/30 bg-amber-400/5 text-amber-400/80 hover:border-amber-400/50 hover:bg-amber-400/10"
+              )}
+            >
+              <Package className="h-3.5 w-3.5" />
+              Sellado por encargue
+            </button>
           </div>
         )}
 
@@ -240,13 +335,13 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
             size="lg"
             className={cn(
               "mt-4 w-full lg:w-auto",
-              isOrderMode && "bg-amber-500 text-amber-950 hover:bg-amber-400"
+              orderSelected && "bg-amber-500 text-amber-950 hover:bg-amber-400"
             )}
             onClick={handleAdd}
-            disabled={!canAdd && !isOrderMode}
+            disabled={!canAdd}
           >
             <ShoppingBag className="mr-2 h-5 w-5" />
-            {isOrderMode ? "Encargar ahora" : hasAnyStock ? "Agregar al carrito" : "Sin stock"}
+            {buttonLabel}
           </Button>
         </motion.div>
       </div>
@@ -263,7 +358,7 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
             {/* Backdrop */}
             <motion.div
               className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-              onClick={() => setShowOrderWarning(false)}
+              onClick={handleCancelOrder}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -282,7 +377,7 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
 
               {/* Close button */}
               <button
-                onClick={() => setShowOrderWarning(false)}
+                onClick={handleCancelOrder}
                 className="absolute right-3 top-3 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 <X className="h-4 w-4" />
@@ -351,7 +446,7 @@ export function ProductDetail({ product }: { product: ProductWithDetails }) {
                   <Button
                     variant="outline"
                     className="flex-1 border-border/50"
-                    onClick={() => setShowOrderWarning(false)}
+                    onClick={handleCancelOrder}
                   >
                     Cancelar
                   </Button>
