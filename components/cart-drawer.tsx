@@ -114,7 +114,7 @@ export function CartDrawer({
               <AnimatePresence mode="popLayout">
                 {cart.items.map((item) => (
                   <motion.div
-                    key={item.variantId}
+                    key={item.key}
                     layout
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -142,11 +142,23 @@ export function CartDrawer({
                           {item.variantName}
                           {item.ml ? ` - ${item.ml}ml` : ""}
                         </p>
+                        {item.combo && (
+                          <ul className="mt-1.5 space-y-0.5">
+                            {item.combo.picks.map((pick, i) => (
+                              <li
+                                key={`${pick.productId}-${i}`}
+                                className="truncate text-[11px] leading-snug text-muted-foreground/70"
+                              >
+                                <span className="text-primary/60">-</span> {pick.name}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => cart.updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() => cart.updateQuantity(item.key, item.quantity - 1)}
                             className="rounded-lg border border-border/50 bg-card/50 p-1.5 text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground"
                             aria-label="Reducir cantidad"
                           >
@@ -156,14 +168,14 @@ export function CartDrawer({
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => cart.updateQuantity(item.variantId, item.quantity + 1)}
+                            onClick={() => cart.updateQuantity(item.key, item.quantity + 1)}
                             className="rounded-lg border border-border/50 bg-card/50 p-1.5 text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground"
                             aria-label="Aumentar cantidad"
                           >
                             <Plus className="h-3 w-3" />
                           </button>
                           <button
-                            onClick={() => cart.removeItem(item.variantId)}
+                            onClick={() => cart.removeItem(item.key)}
                             className="ml-1.5 rounded-lg border border-transparent p-1.5 text-muted-foreground/60 transition-all hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
                             aria-label="Eliminar item"
                           >

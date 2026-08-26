@@ -2,7 +2,21 @@
 
 import { useSyncExternalStore, useCallback } from "react"
 
+/** Perfume elegido dentro de un combo armado por el comprador. */
+export interface CartComboPick {
+  productId: number
+  name: string
+  imageUrl: string | null
+}
+
 export interface CartItem {
+  /**
+   * Identidad del item en el carrito. Reemplaza al viejo indice por variantId,
+   * que no alcanzaba para un combo (varios productos en un solo item).
+   * Formatos: "v:12" variante | "o:-10007" encargue | "r:45" rifa |
+   * "c:2:7-7-19" combo (id del combo + ids elegidos, ordenados).
+   */
+  key: string
   variantId: number
   productId: number
   productName: string
@@ -12,6 +26,11 @@ export interface CartItem {
   price: number
   quantity: number
   imageUrl: string | null
+  combo?: {
+    comboId: number
+    comboName: string
+    picks: CartComboPick[]
+  }
 }
 
 interface CartState {
@@ -47,6 +66,50 @@ function asInt(v: unknown, fallback: number): number {
   return Number.isFinite(n) ? Math.trunc(n) : fallback
 }
 
+/** Clave estable de un combo: dos armados con los mismos perfumes se fusionan. */
+export function buildComboKey(comboId: number, productIds: number[]): string {
+  return `c:${comboId}:${[...productIds].sort((a, b) => a - b).join("-")}`
+}
+
+/**
+ * La clave se deriva siempre del contenido del item, nunca se confia en la que
+ * venga guardada: asi los carritos que quedaron en localStorage antes de este
+ * cambio (que no tienen key) siguen funcionando sin migracion.
+ */
+function deriveKey(item: {
+  variantId: number
+  productId: number
+  combo?: { comboId: number; picks: CartComboPick[] }
+}): string {
+  if (item.combo) {
+    return buildComboKey(item.combo.comboId, item.combo.picks.map((p) => p.productId))
+  }
+  if (item.variantId <= ORDER_VARIANT_ID_OFFSET) return `o:${item.variantId}`
+  if (item.variantId < 0 && item.productId === 0) return `r:${-item.variantId}`
+  return `v:${item.variantId}`
+}
+
+function sanitizeComboPick(v: unknown): CartComboPick | null {
+  if (!isRecord(v)) return null
+  const productId = asInt(v.productId, -1)
+  const name = asString(v.name)
+  const imageUrlRaw = v.imageUrl
+  const imageUrl = imageUrlRaw === null || imageUrlRaw === undefined ? null : asString(imageUrlRaw)
+  if (productId <= 0 || !name) return null
+  return { productId, name, imageUrl }
+}
+
+function sanitizeCombo(v: unknown): CartItem["combo"] | null {
+  if (!isRecord(v)) return null
+  const comboId = asInt(v.comboId, -1)
+  const comboName = asString(v.comboName)
+  const rawPicks = v.picks
+  if (comboId <= 0 || !comboName || !Array.isArray(rawPicks)) return null
+  const picks = rawPicks.map(sanitizeComboPick).filter(Boolean) as CartComboPick[]
+  if (picks.length === 0 || picks.length !== rawPicks.length) return null
+  return { comboId, comboName, picks }
+}
+
 function sanitizeCartItem(v: unknown): CartItem | null {
   if (!isRecord(v)) return null
 
@@ -65,15 +128,20 @@ function sanitizeCartItem(v: unknown): CartItem | null {
   const price = asNumber(v.price, NaN)
   const quantity = asInt(v.quantity, 0)
 
+  const combo = v.combo === undefined || v.combo === null ? null : sanitizeCombo(v.combo)
+  // Un item que dice ser combo pero trae un combo corrupto se descarta entero.
+  if (v.combo !== undefined && v.combo !== null && !combo) return null
+
+  const isComboItem = !!combo
   const isRaffleItem = variantId <= -1 && variantId >= -300 && productId === 0
   const isOrderItem = variantId <= ORDER_VARIANT_ID_OFFSET && productId > 0
-  if (!isRaffleItem && !isOrderItem && (variantId < 0 || productId < 0)) return null
+  if (!isComboItem && !isRaffleItem && !isOrderItem && (variantId < 0 || productId < 0)) return null
   if (!productName || !productSlug || !variantName) return null
   if (!Number.isFinite(price) || price < 0) return null
   if (quantity <= 0) return null
   if (ml !== null && (!Number.isFinite(ml) || ml <= 0)) return null
 
-  return {
+  const base = {
     variantId,
     productId,
     productName,
@@ -83,7 +151,10 @@ function sanitizeCartItem(v: unknown): CartItem | null {
     price,
     quantity,
     imageUrl,
+    ...(combo ? { combo } : {}),
   }
+
+  return { key: deriveKey(base), ...base }
 }
 
 function sanitizeCartState(v: unknown): CartState {
@@ -158,34 +229,35 @@ function getServerSnapshot(): CartState {
 export function useCart() {
   const cart = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  const addItem = useCallback((item: Omit<CartItem, "quantity">) => {
-    const existing = state.items.find((i) => i.variantId === item.variantId)
+  const addItem = useCallback((item: Omit<CartItem, "quantity" | "key">) => {
+    const key = deriveKey(item)
+    const existing = state.items.find((i) => i.key === key)
     if (existing) {
       state = {
         ...state,
         items: state.items.map((i) =>
-          i.variantId === item.variantId ? { ...i, quantity: i.quantity + 1 } : i
+          i.key === key ? { ...i, quantity: i.quantity + 1 } : i
         ),
       }
     } else {
-      state = { ...state, items: [...state.items, { ...item, quantity: 1 }] }
+      state = { ...state, items: [...state.items, { ...item, key, quantity: 1 }] }
     }
     emit()
   }, [])
 
-  const removeItem = useCallback((variantId: number) => {
-    state = { ...state, items: state.items.filter((i) => i.variantId !== variantId) }
+  const removeItem = useCallback((key: string) => {
+    state = { ...state, items: state.items.filter((i) => i.key !== key) }
     emit()
   }, [])
 
-  const updateQuantity = useCallback((variantId: number, quantity: number) => {
+  const updateQuantity = useCallback((key: string, quantity: number) => {
     if (quantity <= 0) {
-      state = { ...state, items: state.items.filter((i) => i.variantId !== variantId) }
+      state = { ...state, items: state.items.filter((i) => i.key !== key) }
     } else {
       state = {
         ...state,
         items: state.items.map((i) =>
-          i.variantId === variantId ? { ...i, quantity } : i
+          i.key === key ? { ...i, quantity } : i
         ),
       }
     }

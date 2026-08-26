@@ -60,3 +60,35 @@ export interface ProductWithDetails extends Product {
   order_min_price?: number | null
   has_order?: boolean
 }
+export interface Combo {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  image_url: string | null
+  slots: number
+  price_int: number
+  is_active: boolean
+  sort_order: number
+  created_at: string
+}
+
+/** Perfume elegible dentro de un combo (pool resuelto en cada carga). */
+export interface ComboPoolProduct {
+  id: number
+  name: string
+  slug: string
+  brand: string | null
+  image_url: string | null
+  /** Todas las categorias del producto, para filtrar por chips en el armador. */
+  category_ids: number[]
+  category_name: string | null
+}
+
+export interface ComboWithDetails extends Combo {
+  category_ids: number[]
+  categories: { id: number; name: string }[]
+  /** Cantidad de perfumes disponibles hoy para armar este combo. */
+  available_count: number
+  pool?: ComboPoolProduct[]
+}

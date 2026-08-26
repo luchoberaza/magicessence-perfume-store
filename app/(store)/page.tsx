@@ -1,13 +1,14 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
-import { getFeaturedProducts, getCategories } from "@/lib/queries"
+import { getFeaturedProducts, getCategories, getCombos } from "@/lib/queries"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturedCarousel } from "@/components/featured-carousel"
 import {
   SectionHeader,
   StatsBanner,
   CategoriesGrid,
+  CombosStrip,
   HowToBuySteps,
   TrustBadges,
   CatalogCTA,
@@ -20,9 +21,10 @@ export const metadata = {
 }
 
 export default async function HomePage() {
-  const [featured, categories] = await Promise.all([
+  const [featured, categories, combos] = await Promise.all([
     getFeaturedProducts(6),
     getCategories(),
+    getCombos(),
   ])
 
   return (
@@ -58,6 +60,9 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Combos */}
+      <CombosStrip combos={combos} />
 
       {/* How to buy */}
       <section className="relative border-t border-border/20 bg-card/20">

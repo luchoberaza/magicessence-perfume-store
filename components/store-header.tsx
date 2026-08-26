@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/categorias", label: "Categorias" },
   { href: "/productos", label: "Productos" },
+  { href: "/combos", label: "Combos" },
   // { href: "/rifa", label: "Rifa" },
   { href: "/contacto", label: "Contacto" },
 ]

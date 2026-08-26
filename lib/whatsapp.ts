@@ -26,6 +26,8 @@ export interface OrderItem {
   variant: string
   quantity: number
   unitPrice: number
+  /** Lineas extra bajo el item: los perfumes elegidos dentro de un combo. */
+  details?: string[]
 }
 
 export interface OrderCustomer {
@@ -51,6 +53,9 @@ export function buildOrderWhatsAppUrl(
   for (const item of items) {
     const formatter = new Intl.NumberFormat("es-UY", { style: "currency", currency: "UYU", minimumFractionDigits: 0, maximumFractionDigits: 0 })
     text += `${item.name} - ${item.variant} x${item.quantity} (${formatter.format(item.unitPrice)} c/u)\n`
+    for (const detail of item.details ?? []) {
+      text += `   - ${detail}\n`
+    }
   }
   const fmt = new Intl.NumberFormat("es-UY", { style: "currency", currency: "UYU", minimumFractionDigits: 0, maximumFractionDigits: 0 })
   text += `\n--- Resumen ---\n`

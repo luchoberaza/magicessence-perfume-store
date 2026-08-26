@@ -4,26 +4,28 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
   LogOut, Package, LayoutGrid, Percent, Sparkles,
-  ChevronRight, TrendingUp, Box, Layers, Activity
+  ChevronRight, TrendingUp, Box, Layers, Activity, Gift
 } from "lucide-react"
 import { CategoriesTab } from "./categories-tab"
 import { ProductsTab } from "./products-tab"
 import { DiscountsTab } from "./discounts-tab"
+import { CombosTab } from "./combos-tab"
 import { cn } from "@/lib/utils"
 
-type View = "products" | "categories" | "discounts"
+type View = "products" | "categories" | "combos" | "discounts"
 
 const navigation = [
   { id: "products" as View, label: "Productos", icon: Package, shortcut: "1" },
   { id: "categories" as View, label: "Categorias", icon: Layers, shortcut: "2" },
-  { id: "discounts" as View, label: "Descuentos", icon: Percent, shortcut: "3" },
+  { id: "combos" as View, label: "Combos", icon: Gift, shortcut: "3" },
+  { id: "discounts" as View, label: "Descuentos", icon: Percent, shortcut: "4" },
 ]
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [view, setView] = useState<View>("products")
   const [loggingOut, setLoggingOut] = useState(false)
-  const [stats, setStats] = useState({ products: 0, categories: 0, discounts: 0, inStock: 0 })
+  const [stats, setStats] = useState({ products: 0, categories: 0, combos: 0, discounts: 0, inStock: 0 })
   const [time, setTime] = useState("")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
@@ -42,11 +44,18 @@ export default function AdminDashboard() {
       fetch("/api/admin/products").then((r) => r.json()),
       fetch("/api/admin/categories").then((r) => r.json()),
       fetch("/api/admin/discounts").then((r) => r.json()),
-    ]).then(([p, c, d]) => {
+      fetch("/api/admin/combos").then((r) => r.json()),
+    ]).then(([p, c, d, cb]) => {
       const inStock = p.reduce((acc: number, prod: any) => {
         return acc + (prod.variants?.filter((v: any) => v.in_stock).length ?? 0)
       }, 0)
-      setStats({ products: p?.length ?? 0, categories: c?.length ?? 0, discounts: d?.length ?? 0, inStock })
+      setStats({
+        products: p?.length ?? 0,
+        categories: c?.length ?? 0,
+        combos: cb?.length ?? 0,
+        discounts: d?.length ?? 0,
+        inStock,
+      })
     }).catch(() => {})
   }, [])
 
@@ -55,7 +64,8 @@ export default function AdminDashboard() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       if (e.key === "1") setView("products")
       if (e.key === "2") setView("categories")
-      if (e.key === "3") setView("discounts")
+      if (e.key === "3") setView("combos")
+      if (e.key === "4") setView("discounts")
     }
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
@@ -151,6 +161,7 @@ export default function AdminDashboard() {
                 { label: "Productos", value: stats.products, icon: Box },
                 { label: "En stock", value: stats.inStock, icon: Activity },
                 { label: "Categorias", value: stats.categories, icon: Layers },
+                { label: "Combos", value: stats.combos, icon: Gift },
                 { label: "Codigos", value: stats.discounts, icon: TrendingUp },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs">
@@ -167,6 +178,7 @@ export default function AdminDashboard() {
         <div className="flex-1 overflow-y-auto p-4 pb-20 lg:p-8 lg:pb-8">
           {view === "products" && <ProductsTab />}
           {view === "categories" && <CategoriesTab />}
+          {view === "combos" && <CombosTab />}
           {view === "discounts" && <DiscountsTab />}
         </div>
       </main>

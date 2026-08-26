@@ -59,6 +59,12 @@ export function CheckoutForm() {
             ml: i.ml,
             quantity: i.quantity,
             unitPrice: i.price,
+            ...(i.combo
+              ? {
+                  comboId: i.combo.comboId,
+                  comboPicks: i.combo.picks.map((p) => ({ id: p.productId, name: p.name })),
+                }
+              : {}),
           })),
           subtotal: cart.subtotal,
           discountCode: cart.discountCode,
@@ -77,6 +83,7 @@ export function CheckoutForm() {
         variant: `${i.variantName}${i.ml ? ` ${i.ml}ml` : ""}`,
         quantity: i.quantity,
         unitPrice: i.price,
+        details: i.combo?.picks.map((p) => p.name),
       })),
       cart.subtotal,
       cart.discount,
@@ -123,12 +130,24 @@ export function CheckoutForm() {
           <h2 className="text-lg font-semibold text-foreground">Tu pedido</h2>
           <div className="space-y-3">
             {cart.items.map((item) => (
-              <div key={item.variantId} className="flex justify-between gap-3 text-sm">
+              <div key={item.key} className="flex justify-between gap-3 text-sm">
                 <div>
                   <p className="font-medium text-foreground">{item.productName}</p>
                   <p className="text-xs text-muted-foreground">
                     {item.variantName}{item.ml ? ` - ${item.ml}ml` : ""} x{item.quantity}
                   </p>
+                  {item.combo && (
+                    <ul className="mt-1 space-y-0.5">
+                      {item.combo.picks.map((pick, i) => (
+                        <li
+                          key={`${pick.productId}-${i}`}
+                          className="text-[11px] leading-snug text-muted-foreground/70"
+                        >
+                          <span className="text-primary/60">-</span> {pick.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <p className="shrink-0 font-medium text-foreground">
                   {formatUYU(item.price * item.quantity)}

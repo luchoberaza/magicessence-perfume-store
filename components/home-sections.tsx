@@ -4,7 +4,8 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, ShoppingBag, MessageCircle, Star, Truck, Shield, Droplets, Sparkles, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Category } from "@/lib/types"
+import type { Category, ComboWithDetails } from "@/lib/types"
+import { ComboCard } from "./combo-card"
 import {
   FadeIn,
   StaggerContainer,
@@ -323,10 +324,58 @@ function FinalCTA() {
   )
 }
 
+/**
+ * Franja de combos del home. Solo se renderiza si hay combos activos; muestra
+ * los primeros y manda a /combos.
+ */
+function CombosStrip({ combos }: { combos: ComboWithDetails[] }) {
+  if (combos.length === 0) return null
+
+  return (
+    <section className="relative overflow-hidden border-t border-border/20">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-background to-accent/[0.04]" />
+      <GlowOrb color="accent" size="md" className="-top-10 right-1/4" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-20 lg:px-8">
+        <SectionHeader
+          label="Combos"
+          title="Arma tu combo"
+          description="Elegi los perfumes que quieras y llevatelos a un precio fijo"
+        />
+
+        <StaggerContainer className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {combos.slice(0, 3).map((combo) => (
+            <StaggerItem key={combo.id}>
+              <ComboCard combo={combo} />
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+
+        <FadeIn delay={0.3} className="mt-10 text-center">
+          <MagneticButton>
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-primary/30 hover:border-primary/60 hover:bg-primary/5"
+              asChild
+            >
+              <Link href="/combos">
+                Ver todos los combos
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </MagneticButton>
+        </FadeIn>
+      </div>
+    </section>
+  )
+}
+
 export {
   SectionHeader,
   StatsBanner,
   CategoriesGrid,
+  CombosStrip,
   HowToBuySteps,
   TrustBadges,
   CatalogCTA,
