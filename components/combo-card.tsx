@@ -11,7 +11,7 @@ export function ComboCard({ combo }: { combo: ComboWithDetails }) {
   return (
     <Link
       href={`/combos/${combo.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-card/50 hover:shadow-[0_0_40px_hsl(265_55%_65%/0.08)]"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/30 backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:bg-card/50 hover:shadow-[0_0_40px_hsl(265_55%_65%/0.08)]"
     >
       {/* Imagen */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -28,13 +28,13 @@ export function ComboCard({ combo }: { combo: ComboWithDetails }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
 
-        <Badge className="absolute left-3 top-3 border-0 bg-primary/90 text-primary-foreground backdrop-blur-sm">
+        <Badge className="absolute left-3 top-3 border-0 bg-primary/90 text-primary-foreground backdrop-blur-md">
           <Gift className="mr-1 h-3 w-3" />
           {combo.slots} perfumes
         </Badge>
 
         {!armable && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-md">
             <span className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               No disponible
             </span>

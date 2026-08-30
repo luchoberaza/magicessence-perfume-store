@@ -17,7 +17,7 @@ export function FeaturedCarousel({ products }: { products: ProductWithDetails[] 
           <ScaleOnHover>
             <Link
               href={`/producto/${product.slug}`}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-card/60 hover:shadow-[0_0_40px_hsl(265_55%_65%/0.1)]"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:bg-card/60 hover:shadow-[0_0_40px_hsl(265_55%_65%/0.1)]"
             >
               <div className="relative aspect-square overflow-hidden">
                 {product.images?.[0]?.url ? (
@@ -33,19 +33,19 @@ export function FeaturedCarousel({ products }: { products: ProductWithDetails[] 
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 {!product.has_stock && !hasOrder && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-md">
                     <span className="rounded-lg bg-secondary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                       Sin stock
                     </span>
                   </div>
                 )}
                 {!product.has_stock && hasOrder && (
-                  <Badge className="absolute right-3 top-3 border-0 bg-amber-500/90 text-amber-950 backdrop-blur-sm">
+                  <Badge className="absolute right-3 top-3 border-0 bg-amber-500/90 text-amber-950 backdrop-blur-md">
                     Por encargue
                   </Badge>
                 )}
                 {product.featured && product.has_stock && (
-                  <Badge className="absolute left-3 top-3 border-0 bg-primary/90 text-primary-foreground backdrop-blur-sm">
+                  <Badge className="absolute left-3 top-3 border-0 bg-primary/90 text-primary-foreground backdrop-blur-md">
                     Destacado
                   </Badge>
                 )}
@@ -106,7 +106,7 @@ export function CategoryShowcase() {
         <StaggerItem key={cat.name}>
           <Link
             href={cat.href}
-            className="group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card/30 p-6 text-center backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-card/50 hover:shadow-[0_0_30px_hsl(265_55%_65%/0.08)]"
+            className="group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border border-border/50 bg-card/30 p-6 text-center backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:bg-card/50 hover:shadow-[0_0_30px_hsl(265_55%_65%/0.08)]"
           >
             <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
             <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-2xl font-bold text-primary transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">

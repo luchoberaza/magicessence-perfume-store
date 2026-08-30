@@ -20,6 +20,9 @@ metadataBase: new URL("https://www.misticessence.com"),
 alternates: {
   canonical: "/",
 },
+// El favicon de la pestaña y el icono que muestra Google salen de
+// app/icon.png y app/apple-icon.png; la imagen al compartir el link, de
+// app/opengraph-image.png. Next los detecta por convencion de archivo.
 openGraph: {
   title: "Mistic Essence | Perfumes Premium en Salto, Uruguay",
   description:
@@ -74,7 +77,7 @@ twitter: {
   "decants de perfumes unisex",
   "decants de perfumes de autor",
   "decants de perfumes de lujo",
-  ,"decants en Salto",
+  "decants en Salto",
   "decants en Uruguay",
   "decants online",
   "decants a domicilio",
@@ -111,6 +114,41 @@ twitter: {
 }
 
 
+/**
+ * Datos estructurados del negocio. Es lo que le permite a Google asociar el
+ * logo, el telefono y la ubicacion a la marca en los resultados de busqueda.
+ */
+const negocioJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Store",
+  name: "Mistic Essence",
+  slogan: "Despertá tu esencia",
+  description:
+    "Perfumes premium, decants y combos armables en Salto, Uruguay.",
+  url: "https://www.misticessence.com",
+  logo: "https://www.misticessence.com/logo-mistic.png",
+  image: "https://www.misticessence.com/og-image.png",
+  telephone: "+598 98 158 434",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Salto",
+    addressCountry: "UY",
+  },
+  areaServed: {
+    "@type": "Country",
+    name: "Uruguay",
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      opens: "09:00",
+      closes: "20:00",
+    },
+  ],
+  sameAs: ["https://www.instagram.com/mistic.essence"],
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -119,6 +157,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${poppins.variable} font-sans antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(negocioJsonLd) }}
+        />
         {children}
       </body>
     </html>

@@ -18,7 +18,7 @@ export function PageHero({ title, highlight, subtitle, backLink }: PageHeroProps
   return (
     <section className="relative overflow-hidden border-b border-border/20">
       {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-background to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.06] via-transparent to-background/40" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(265_55%_65%/0.1),transparent_60%)]" />
       <GlowOrb color="primary" size="md" className="-top-16 right-1/4" />
       <GlowOrb color="accent" size="sm" className="bottom-0 left-1/4" />
@@ -44,7 +44,7 @@ export function PageHero({ title, highlight, subtitle, backLink }: PageHeroProps
           >
             <Link
               href={backLink.href}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/30 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-foreground"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/30 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur-md transition-all hover:border-primary/30 hover:text-foreground"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {backLink.label}

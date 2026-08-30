@@ -4,13 +4,12 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, ShoppingBag, MessageCircle, Star, Truck, Shield, Droplets, Sparkles, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Category, ComboWithDetails } from "@/lib/types"
-import { ComboCard } from "./combo-card"
+import type { Category } from "@/lib/types"
+import { ScrollReveal, SpotlightCard } from "./effects"
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
-  TextReveal,
   GlowOrb,
   CountUp,
   MagneticButton,
@@ -33,11 +32,9 @@ function SectionHeader({
           {label}
         </span>
       </FadeIn>
-      <TextReveal delay={0.1} className="mt-4">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-          {title}
-        </h2>
-      </TextReveal>
+      <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+        <ScrollReveal text={title} />
+      </h2>
       <FadeIn delay={0.2}>
         <p className="mx-auto mt-3 max-w-md text-muted-foreground">
           {description}
@@ -56,7 +53,7 @@ function StatsBanner() {
   ]
 
   return (
-    <section className="relative border-y border-border/20 bg-card/30 backdrop-blur-sm">
+    <section className="relative border-y border-border/20 bg-card/30 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
           {stats.map((stat, i) => (
@@ -106,32 +103,34 @@ function CategoriesGrid({ categories }: { categories: Category[] }) {
 
         return (
           <StaggerItem key={cat.id}>
-            <Link
-              href={`/categorias/${cat.slug}`}
-              className="group relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl border border-border/50 bg-card/30 p-8 text-center backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-card/50 hover:shadow-[0_0_40px_hsl(265_55%_65%/0.08)]"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
-              <motion.div
-                className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-bold text-primary transition-colors duration-300 group-hover:bg-primary/20"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            <SpotlightCard className="h-full rounded-2xl border border-border/50 bg-card/30 backdrop-blur-md transition-colors duration-500 hover:border-primary/30">
+              <Link
+                href={`/categorias/${cat.slug}`}
+                className="relative flex h-full flex-col items-center gap-4 p-8 text-center"
               >
-                {cat.image_url ? (
-                  <img
-                    src={cat.image_url}
-                    alt={cat.name}
-                    className="h-10 w-10 rounded-lg object-cover"
-                  />
-                ) : (
-                  meta.icon
-                )}
-              </motion.div>
-              <div className="relative">
-                <span className="text-sm font-semibold text-foreground">
-                  {cat.name}
-                </span>
-              </div>
-            </Link>
+                <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
+                <motion.div
+                  className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-bold text-primary transition-colors duration-300 group-hover:bg-primary/20"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                >
+                  {cat.image_url ? (
+                    <img
+                      src={cat.image_url}
+                      alt={cat.name}
+                      className="h-10 w-10 rounded-lg object-cover"
+                    />
+                  ) : (
+                    meta.icon
+                  )}
+                </motion.div>
+                <div className="relative">
+                  <span className="text-sm font-semibold text-foreground">
+                    {cat.name}
+                  </span>
+                </div>
+              </Link>
+            </SpotlightCard>
           </StaggerItem>
         )
       })}
@@ -168,33 +167,35 @@ function HowToBuySteps() {
     <StaggerContainer className="grid gap-6 sm:grid-cols-3" staggerDelay={0.15}>
       {steps.map((item, i) => (
         <StaggerItem key={item.step}>
-          <div className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-border/50 bg-card/30 p-8 text-center backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:bg-card/50 hover:shadow-[0_0_30px_hsl(265_55%_65%/0.08)]">
-            <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
+          <SpotlightCard className="h-full rounded-2xl border border-border/50 bg-card/30 backdrop-blur-md transition-colors duration-500 hover:border-primary/30">
+            <div className="relative flex h-full flex-col items-center p-8 text-center">
+              <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
 
-            {/* Step number */}
-            <span className="relative mb-4 text-5xl font-black text-primary/10 transition-colors duration-300 group-hover:text-primary/20">
-              {item.step}
-            </span>
+              {/* Numero de paso */}
+              <span className="relative mb-4 text-5xl font-black text-primary/10 transition-colors duration-300 group-hover:text-primary/20">
+                {item.step}
+              </span>
 
-            {/* Icon */}
-            <motion.div
-              className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary/20"
-              whileHover={{ rotate: 10, scale: 1.1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 15 }}
-            >
-              <item.icon className="h-6 w-6" />
-            </motion.div>
+              {/* Icono */}
+              <motion.div
+                className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary/20"
+                whileHover={{ rotate: 10, scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              >
+                <item.icon className="h-6 w-6" />
+              </motion.div>
 
-            <h3 className="relative text-lg font-bold text-foreground">{item.title}</h3>
-            <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
-              {item.desc}
-            </p>
+              <h3 className="relative text-lg font-bold text-foreground">{item.title}</h3>
+              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+                {item.desc}
+              </p>
 
-            {/* Connector line */}
-            {i < steps.length - 1 && (
-              <div className="absolute -right-3 top-1/2 hidden h-px w-6 bg-gradient-to-r from-primary/30 to-transparent sm:block" />
-            )}
-          </div>
+              {/* Conector */}
+              {i < steps.length - 1 && (
+                <div className="absolute -right-3 top-1/2 hidden h-px w-6 bg-gradient-to-r from-primary/30 to-transparent sm:block" />
+              )}
+            </div>
+          </SpotlightCard>
         </StaggerItem>
       ))}
     </StaggerContainer>
@@ -238,7 +239,7 @@ function TrustBadges() {
       <StaggerContainer className="grid grid-cols-2 gap-6 lg:grid-cols-4" staggerDelay={0.1}>
         {badges.map((badge) => (
           <StaggerItem key={badge.title}>
-            <div className="group flex flex-col items-center gap-3 rounded-2xl border border-border/30 bg-card/20 p-6 text-center transition-all duration-300 hover:border-primary/20 hover:bg-card/40">
+            <div className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border/30 bg-card/20 p-6 text-center backdrop-blur-md transition-all duration-300 hover:border-primary/20 hover:bg-card/40">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
                 <badge.icon className="h-5 w-5" />
               </div>
@@ -256,7 +257,7 @@ function CatalogCTA() {
   return (
     <FadeIn delay={0.3} className="mt-10 text-center">
       <MagneticButton>
-        <Button variant="outline" size="lg" className="border-primary/30 hover:border-primary/60 hover:bg-primary/5" asChild>
+        <Button variant="outline" size="lg" className="border-primary/30 bg-background/20 backdrop-blur-sm hover:border-primary/60 hover:bg-primary/10" asChild>
           <Link href="/productos">
             Ver todo el catalogo
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -270,7 +271,7 @@ function CatalogCTA() {
 function FinalCTA() {
   return (
     <section className="relative overflow-hidden border-t border-border/20">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-background to-accent/[0.05]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-accent/[0.06]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(265_55%_65%/0.08),transparent_60%)]" />
       <GlowOrb color="primary" size="lg" className="top-0 left-1/4" />
       <GlowOrb color="accent" size="md" className="bottom-0 right-1/4" />
@@ -280,14 +281,12 @@ function FinalCTA() {
           <FadeIn>
             <Sparkles className="mx-auto h-8 w-8 text-primary" />
           </FadeIn>
-          <TextReveal delay={0.1} className="mt-6">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-5xl">
-              Encontra tu{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                fragancia ideal
-              </span>
-            </h2>
-          </TextReveal>
+          <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground lg:text-5xl">
+            <ScrollReveal text="Encontra tu" />{" "}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <ScrollReveal text="fragancia ideal" delay={0.15} />
+            </span>
+          </h2>
           <FadeIn delay={0.3}>
             <p className="mt-4 text-muted-foreground lg:text-lg">
               Explora nuestra coleccion y descubri la esencia que te representa.
@@ -307,7 +306,7 @@ function FinalCTA() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="px-8 py-6 text-base border-primary/30"
+                  className="border-primary/30 bg-background/20 px-8 py-6 text-base backdrop-blur-sm"
                   asChild
                 >
                   <Link href="/contacto">
@@ -324,58 +323,10 @@ function FinalCTA() {
   )
 }
 
-/**
- * Franja de combos del home. Solo se renderiza si hay combos activos; muestra
- * los primeros y manda a /combos.
- */
-function CombosStrip({ combos }: { combos: ComboWithDetails[] }) {
-  if (combos.length === 0) return null
-
-  return (
-    <section className="relative overflow-hidden border-t border-border/20">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-background to-accent/[0.04]" />
-      <GlowOrb color="accent" size="md" className="-top-10 right-1/4" />
-
-      <div className="relative mx-auto max-w-7xl px-4 py-20 lg:px-8">
-        <SectionHeader
-          label="Combos"
-          title="Arma tu combo"
-          description="Elegi los perfumes que quieras y llevatelos a un precio fijo"
-        />
-
-        <StaggerContainer className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {combos.slice(0, 3).map((combo) => (
-            <StaggerItem key={combo.id}>
-              <ComboCard combo={combo} />
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-
-        <FadeIn delay={0.3} className="mt-10 text-center">
-          <MagneticButton>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-primary/30 hover:border-primary/60 hover:bg-primary/5"
-              asChild
-            >
-              <Link href="/combos">
-                Ver todos los combos
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </MagneticButton>
-        </FadeIn>
-      </div>
-    </section>
-  )
-}
-
 export {
   SectionHeader,
   StatsBanner,
   CategoriesGrid,
-  CombosStrip,
   HowToBuySteps,
   TrustBadges,
   CatalogCTA,
