@@ -34,6 +34,8 @@ export interface OrderCustomer {
   nombre: string
   departamento: string
   domicilio: string
+  /** Cedula del destinatario. Solo en envios: las agencias la piden para entregar. */
+  cedula?: string
   correo?: string
   metodoPago: string
   entrega: string
@@ -66,6 +68,7 @@ export function buildOrderWhatsAppUrl(
   text += `TOTAL: ${fmt.format(total)}\n`
   text += `\n--- Datos del Cliente ---\n`
   text += `Nombre: ${customer.nombre}\n`
+  if (customer.cedula) text += `Cedula: ${customer.cedula}\n`
   text += `Departamento: ${customer.departamento}\n`
   text += `Domicilio: ${customer.domicilio}\n`
   if (customer.correo) text += `Correo: ${customer.correo}\n`

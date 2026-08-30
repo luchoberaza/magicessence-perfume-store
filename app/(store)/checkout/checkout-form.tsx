@@ -8,21 +8,42 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { MessageCircle, ShoppingBag } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import { IdCard, MessageCircle, ShoppingBag } from "lucide-react"
 import { useCart } from "@/lib/cart-store"
 import { formatUYU } from "@/lib/currency"
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp"
 import Link from "next/link"
 
-const schema = z.object({
-  nombre: z.string().min(1, "Requerido"),
-  departamento: z.string().min(1, "Requerido"),
-  domicilio: z.string().min(1, "Requerido"),
-  correo: z.string().email("Email no valido").or(z.literal("")).optional(),
-  metodoPago: z.enum(["transferencia", "efectivo"]),
-  entrega: z.enum(["retiro", "envio"]),
-  nota: z.string().optional(),
-})
+/** Deja la cedula en digitos: acepta 1.234.567-8, 12345678 o con espacios. */
+function soloDigitos(valor: string): string {
+  return valor.replace(/\D/g, "")
+}
+
+const schema = z
+  .object({
+    nombre: z.string().min(1, "Requerido"),
+    departamento: z.string().min(1, "Requerido"),
+    domicilio: z.string().min(1, "Requerido"),
+    cedula: z.string().optional(),
+    correo: z.string().email("Email no valido").or(z.literal("")).optional(),
+    metodoPago: z.enum(["transferencia", "efectivo"]),
+    entrega: z.enum(["retiro", "envio"]),
+    nota: z.string().optional(),
+  })
+  // La cedula es siempre opcional; si la completan, se revisa que tenga pinta
+  // de cedula. No se valida el digito verificador a proposito: un error de
+  // tipeo se arregla por WhatsApp, no vale trabar la compra.
+  .superRefine((data, ctx) => {
+    const cedula = soloDigitos(data.cedula ?? "")
+    if (cedula.length > 0 && (cedula.length < 7 || cedula.length > 8)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cedula"],
+        message: "Revisa la cedula: son 7 u 8 numeros",
+      })
+    }
+  })
 
 type FormData = z.infer<typeof schema>
 
@@ -46,6 +67,10 @@ export function CheckoutForm() {
   const entrega = watch("entrega")
 
   async function onSubmit(data: FormData) {
+    // La cedula solo tiene sentido en un envio: si eligio retiro, no viaja
+    // aunque haya quedado algo escrito antes de cambiar de opcion.
+    const cedulaEnviada = data.entrega === "envio" ? soloDigitos(data.cedula ?? "") : ""
+
     // Save order draft
     try {
       await fetch("/api/order", {
@@ -70,7 +95,7 @@ export function CheckoutForm() {
           discountCode: cart.discountCode,
           discount: cart.discount,
           total: cart.total,
-          customer: data,
+          customer: { ...data, cedula: cedulaEnviada || undefined },
         }),
       })
     } catch {
@@ -92,6 +117,7 @@ export function CheckoutForm() {
         nombre: data.nombre,
         departamento: data.departamento,
         domicilio: data.domicilio,
+        cedula: cedulaEnviada || undefined,
         correo: data.correo || undefined,
         metodoPago: data.metodoPago === "transferencia" ? "Transferencia" : "Efectivo",
         entrega: data.entrega === "retiro" ? "Retiro" : "Envio",
@@ -256,7 +282,13 @@ export function CheckoutForm() {
             <Label className="text-foreground">Entrega</Label>
             <RadioGroup
               value={entrega}
-              onValueChange={(v) => setValue("entrega", v as "retiro" | "envio")}
+              onValueChange={(v) => {
+                const opcion = v as "retiro" | "envio"
+                setValue("entrega", opcion)
+                // Al volver a retiro se limpia la cedula: ni se guarda ni queda
+                // un error de validacion colgado de un campo que ya no se ve.
+                if (opcion === "retiro") setValue("cedula", "")
+              }}
               className="flex gap-3"
             >
               <label className={`flex flex-1 cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm transition-all ${entrega === "retiro" ? "border-primary bg-primary/10 text-primary" : "border-border bg-secondary/50 text-foreground"}`}>
@@ -268,6 +300,43 @@ export function CheckoutForm() {
                 Envio
               </label>
             </RadioGroup>
+
+            {/* La cedula se pide solo en envios: es lo que piden las agencias
+                para entregarle el paquete al destinatario. */}
+            <AnimatePresence initial={false}>
+              {entrega === "envio" && (
+                <motion.div
+                  key="cedula"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.4, 0.25, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="cedula" className="text-foreground">
+                      Cédula <span className="text-xs text-muted-foreground">(opcional)</span>
+                    </Label>
+                    <Input
+                      id="cedula"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="1.234.567-8"
+                      className="bg-secondary/50"
+                      {...register("cedula")}
+                    />
+                    <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                      <IdCard className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/70" />
+                      Si el envío es a otro departamento, la agencia pide la cédula
+                      del destinatario para entregarlo.
+                    </p>
+                    {errors.cedula && (
+                      <p className="text-xs text-destructive">{errors.cedula.message}</p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="space-y-2">
